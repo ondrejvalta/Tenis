@@ -14,8 +14,11 @@ export function formatScore(match: Match, fromPlayer1Perspective = true): string
     .map((s) => {
       const a = fromPlayer1Perspective ? s.p1 : s.p2;
       const b = fromPlayer1Perspective ? s.p2 : s.p1;
+      if (s.superTiebreak) {
+        return `[${a}:${b}]`;
+      }
       const tb = s.tiebreak
-        ? ` (${fromPlayer1Perspective ? s.tiebreak.p1 : s.tiebreak.p2}-${
+        ? ` (${fromPlayer1Perspective ? s.tiebreak.p1 : s.tiebreak.p2}-${
             fromPlayer1Perspective ? s.tiebreak.p2 : s.tiebreak.p1
           })`
         : "";

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPlayer, players } from "@/data/players";
 import { getMatchesForPlayer } from "@/data/matches";
-import { computeStandings } from "@/data/standings";
+import { computeStandingsForGroup } from "@/data/standings";
 import { formatDate, formatScore } from "@/lib/format";
 
 export function generateStaticParams() {
@@ -19,7 +19,7 @@ export default async function HracDetail({
   if (!player) notFound();
 
   const playerMatches = getMatchesForPlayer(id);
-  const standings = computeStandings();
+  const standings = computeStandingsForGroup(player.group);
   const myRow = standings.find((r) => r.playerId === id);
   const rank = standings.findIndex((r) => r.playerId === id) + 1;
 
@@ -31,13 +31,13 @@ export default async function HracDetail({
         </Link>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight">{player.name}</h1>
         <p className="mt-1 text-sm text-neutral-600">
-          V lize od {formatDate(player.joinedAt)}
+          Skupina {player.group} · V lize od {formatDate(player.joinedAt)}
         </p>
       </div>
 
       {myRow && (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <Stat label="Pořadí" value={`#${rank}`} />
+          <Stat label={`Pořadí ve sk. ${player.group}`} value={`#${rank}`} />
           <Stat label="Body" value={String(myRow.points)} />
           <Stat label="Výhry / prohry" value={`${myRow.wins} / ${myRow.losses}`} />
           <Stat

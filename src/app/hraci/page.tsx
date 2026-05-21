@@ -1,24 +1,44 @@
 import Link from "next/link";
-import { players } from "@/data/players";
-import { computeStandings } from "@/data/standings";
+import { getPlayersByGroup, players } from "@/data/players";
+import { computeStandingsForGroup } from "@/data/standings";
 import { formatDate } from "@/lib/format";
+import { GROUPS, type Group } from "@/data/types";
 
-export const metadata = { title: "Hráči | Tenisová liga Madison" };
+export const metadata = { title: "Hráči | Tenisová liga Dobříš" };
 
 export default function HraciPage() {
-  const standings = computeStandings();
-  const statsById = new Map(standings.map((s) => [s.playerId, s]));
-  const sorted = players.slice().sort((a, b) => a.name.localeCompare(b.name, "cs"));
-
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-semibold tracking-tight">Hráči</h1>
         <p className="mt-1 text-sm text-neutral-600">
-          Seznam všech {players.length} hráčů ligy.
+          Seznam všech {players.length} hráčů ligy, rozdělených do tří skupin.
         </p>
       </div>
 
+      {GROUPS.map((group) => (
+        <GroupSection key={group} group={group} />
+      ))}
+    </div>
+  );
+}
+
+function GroupSection({ group }: { group: Group }) {
+  const groupPlayers = getPlayersByGroup(group);
+  const standings = computeStandingsForGroup(group);
+  const statsById = new Map(standings.map((s) => [s.playerId, s]));
+  const sorted = groupPlayers
+    .slice()
+    .sort((a, b) => a.name.localeCompare(b.name, "cs"));
+
+  return (
+    <section>
+      <h2 className="mb-3 text-lg font-semibold">
+        Skupina {group}{" "}
+        <span className="text-sm font-normal text-neutral-500">
+          ({groupPlayers.length} hráčů)
+        </span>
+      </h2>
       <ul className="grid gap-3 sm:grid-cols-2">
         {sorted.map((p) => {
           const s = statsById.get(p.id);
@@ -49,6 +69,6 @@ export default function HraciPage() {
           );
         })}
       </ul>
-    </div>
+    </section>
   );
 }

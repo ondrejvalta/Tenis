@@ -13,7 +13,7 @@ export function Nav() {
       <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
         <Link href="/" className="flex items-center gap-2 text-lg font-semibold">
           <span className="inline-block h-3 w-3 rounded-full bg-lime-500" />
-          Tenisová liga Madison
+          Tenisová liga Dobříš
         </Link>
         <nav className="flex gap-1 text-sm">
           {links.map((l) => (

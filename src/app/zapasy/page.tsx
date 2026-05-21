@@ -1,20 +1,47 @@
 import Link from "next/link";
-import { matches } from "@/data/matches";
+import { getMatchesByGroup, matches } from "@/data/matches";
 import { getPlayer } from "@/data/players";
 import { formatDate, formatScore } from "@/lib/format";
+import { GROUPS, type Group, type Match } from "@/data/types";
+import { Tabs } from "./Tabs";
 
-export const metadata = { title: "Zápasy | Tenisová liga Madison" };
+export const metadata = { title: "Zápasy | Tenisová liga Dobříš" };
 
 export default function ZapasyPage() {
-  const sorted = matches.slice().sort((a, b) => b.date.localeCompare(a.date));
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-semibold tracking-tight">Zápasy</h1>
+        <p className="mt-1 text-sm text-neutral-600">
+          Všech {matches.length} odehraných zápasů, rozdělených do tří skupin.
+        </p>
+      </div>
 
-  // Seskupení podle měsíce
-  const groups = new Map<string, typeof sorted>();
+      <Tabs
+        tabs={GROUPS.map((g) => ({
+          id: g,
+          label: `Skupina ${g} (${getMatchesByGroup(g).length})`,
+        }))}
+      >
+        {GROUPS.map((g) => (
+          <GroupMatches key={g} group={g} />
+        ))}
+      </Tabs>
+    </div>
+  );
+}
+
+function GroupMatches({ group }: { group: Group }) {
+  const sorted = getMatchesByGroup(group)
+    .slice()
+    .sort((a, b) => b.date.localeCompare(a.date));
+
+  const months = new Map<string, Match[]>();
   for (const m of sorted) {
     const key = m.date.slice(0, 7);
-    const arr = groups.get(key) ?? [];
+    const arr = months.get(key) ?? [];
     arr.push(m);
-    groups.set(key, arr);
+    months.set(key, arr);
   }
 
   const monthLabel = (key: string) => {
@@ -23,29 +50,43 @@ export default function ZapasyPage() {
     return d.toLocaleDateString("cs-CZ", { month: "long", year: "numeric" });
   };
 
-  return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-semibold tracking-tight">Zápasy</h1>
-        <p className="mt-1 text-sm text-neutral-600">
-          Všech {matches.length} odehraných zápasů, řazeno od nejnovějších.
-        </p>
-      </div>
+  const entries = Array.from(months.entries());
 
-      {Array.from(groups.entries()).map(([key, group]) => (
-        <section key={key}>
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-neutral-500">
-            {monthLabel(key)}
-          </h2>
-          <ul className="space-y-2">
-            {group.map((m) => {
+  return (
+    <div className="space-y-3">
+      {entries.map(([key, monthMatches], idx) => (
+        <details
+          key={key}
+          open={idx === 0}
+          className="group rounded-lg border border-neutral-200 bg-white"
+        >
+          <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-sm">
+            <span className="flex items-center gap-2">
+              <svg
+                viewBox="0 0 12 12"
+                className="h-3 w-3 text-neutral-400 transition-transform group-open:rotate-90"
+                fill="currentColor"
+                aria-hidden
+              >
+                <path d="M4 2l4 4-4 4V2z" />
+              </svg>
+              <span className="font-semibold capitalize text-neutral-700">
+                {monthLabel(key)}
+              </span>
+            </span>
+            <span className="text-xs text-neutral-500">
+              {monthMatches.length} {matchCountLabel(monthMatches.length)}
+            </span>
+          </summary>
+          <ul className="space-y-2 border-t border-neutral-100 p-3">
+            {monthMatches.map((m) => {
               const p1 = getPlayer(m.player1Id);
               const p2 = getPlayer(m.player2Id);
               const p1Won = m.winnerId === m.player1Id;
               return (
                 <li
                   key={m.id}
-                  className="flex items-center justify-between rounded-lg border border-neutral-200 bg-white px-4 py-3 text-sm"
+                  className="flex items-center justify-between rounded-md border border-neutral-200 bg-white px-4 py-2.5 text-sm"
                 >
                   <div className="flex items-center gap-3">
                     <span className="w-24 text-neutral-500">{formatDate(m.date)}</span>
@@ -68,8 +109,14 @@ export default function ZapasyPage() {
               );
             })}
           </ul>
-        </section>
+        </details>
       ))}
     </div>
   );
+}
+
+function matchCountLabel(n: number): string {
+  if (n === 1) return "zápas";
+  if (n >= 2 && n <= 4) return "zápasy";
+  return "zápasů";
 }
