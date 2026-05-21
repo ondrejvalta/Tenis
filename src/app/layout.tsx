@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Tenisová liga Madison",
+  title: "Tenisová liga Dobříš",
   description: "Amatérská tenisová liga – žebříček, zápasy, hráči",
 };
 
@@ -33,7 +33,7 @@ export default function RootLayout({
         <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8">{children}</main>
         <footer className="border-t border-neutral-200 bg-white">
           <div className="mx-auto max-w-5xl px-4 py-4 text-sm text-neutral-500">
-            © {new Date().getFullYear()} Tenisová liga Madison
+            © {new Date().getFullYear()} Tenisová liga Dobříš
           </div>
         </footer>
       </body>

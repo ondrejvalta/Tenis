@@ -1,22 +1,39 @@
 import Link from "next/link";
-import { computeStandings } from "@/data/standings";
+import { computeStandingsForGroup } from "@/data/standings";
 import { getPlayer } from "@/data/players";
+import { GROUPS, type Group, type StandingRow } from "@/data/types";
 
-export const metadata = { title: "Žebříček | Tenisová liga Madison" };
+export const metadata = { title: "Žebříček | Tenisová liga Dobříš" };
 
 export default function ZebricekPage() {
-  const standings = computeStandings();
-
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-semibold tracking-tight">Žebříček</h1>
         <p className="mt-1 text-sm text-neutral-600">
-          Bodování: výhra = 3 body, prohra v rozhodující sadě = 1 bod, jinak 0.
-          Při shodě bodů rozhoduje setové a poté gemové skóre.
+          Bodování: výhra = 3 body, prohra = 1 bod, kontumace = 0 bodů.
+          Při shodě bodů rozhoduje vzájemný zápas, poté rozdíl setů a poté
+          rozdíl gamů.
+        </p>
+        <p className="mt-2 text-sm text-neutral-600">
+          Zápasy se hrají podle platných pravidel ČTS. Zápas se hraje na 2
+          vítězné sety. Za stavu 1:1 na sety následuje supertiebreak do 10
+          bodů — vítěz musí vyhrát alespoň o 2 body (např. i 13:11).
         </p>
       </div>
 
+      {GROUPS.map((group) => (
+        <GroupTable key={group} group={group} />
+      ))}
+    </div>
+  );
+}
+
+function GroupTable({ group }: { group: Group }) {
+  const standings = computeStandingsForGroup(group);
+  return (
+    <section>
+      <h2 className="mb-3 text-lg font-semibold">Skupina {group}</h2>
       <div className="overflow-hidden rounded-xl border border-neutral-200 bg-white">
         <table className="w-full text-sm">
           <thead className="bg-neutral-50 text-left text-neutral-500">
@@ -32,7 +49,7 @@ export default function ZebricekPage() {
             </tr>
           </thead>
           <tbody>
-            {standings.map((row, idx) => {
+            {standings.map((row: StandingRow, idx: number) => {
               const p = getPlayer(row.playerId);
               return (
                 <tr key={row.playerId} className="border-t border-neutral-100">
@@ -58,6 +75,6 @@ export default function ZebricekPage() {
           </tbody>
         </table>
       </div>
-    </div>
+    </section>
   );
 }
