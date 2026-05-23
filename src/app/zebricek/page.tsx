@@ -1,11 +1,20 @@
 import Link from "next/link";
+import { fetchMatches, fetchPlayers } from "@/lib/data";
 import { computeStandingsForGroup } from "@/data/standings";
-import { getPlayer } from "@/data/players";
-import { GROUPS, type Group, type StandingRow } from "@/data/types";
+import {
+  GROUPS,
+  type Group,
+  type Match,
+  type Player,
+  type StandingRow,
+} from "@/data/types";
 
 export const metadata = { title: "Žebříček | Tenisová liga Dobříš" };
 
-export default function ZebricekPage() {
+export default async function ZebricekPage() {
+  const [players, matches] = await Promise.all([fetchPlayers(), fetchMatches()]);
+  const playersById = new Map(players.map((p) => [p.id, p]));
+
   return (
     <div className="space-y-8">
       <div>
@@ -23,14 +32,30 @@ export default function ZebricekPage() {
       </div>
 
       {GROUPS.map((group) => (
-        <GroupTable key={group} group={group} />
+        <GroupTable
+          key={group}
+          group={group}
+          players={players}
+          matches={matches}
+          playersById={playersById}
+        />
       ))}
     </div>
   );
 }
 
-function GroupTable({ group }: { group: Group }) {
-  const standings = computeStandingsForGroup(group);
+function GroupTable({
+  group,
+  players,
+  matches,
+  playersById,
+}: {
+  group: Group;
+  players: Player[];
+  matches: Match[];
+  playersById: Map<string, Player>;
+}) {
+  const standings = computeStandingsForGroup(group, players, matches);
   return (
     <section>
       <h2 className="mb-3 text-lg font-semibold">Skupina {group}</h2>
@@ -50,7 +75,7 @@ function GroupTable({ group }: { group: Group }) {
           </thead>
           <tbody>
             {standings.map((row: StandingRow, idx: number) => {
-              const p = getPlayer(row.playerId);
+              const p = playersById.get(row.playerId);
               return (
                 <tr key={row.playerId} className="border-t border-neutral-100">
                   <td className="px-4 py-3 text-neutral-500">{idx + 1}</td>

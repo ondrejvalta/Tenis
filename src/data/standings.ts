@@ -1,6 +1,4 @@
-import { matches } from "./matches";
-import { getPlayersByGroup, players } from "./players";
-import type { Group, Match, StandingRow } from "./types";
+import type { Group, Match, Player, StandingRow } from "./types";
 
 function emptyRow(playerId: string): StandingRow {
   return {
@@ -75,7 +73,7 @@ function sortStandings(
   // 1) primárně podle bodů
   const byPoints = rows.slice().sort((a, b) => b.points - a.points);
 
-  // 2) v rámci skupin se stejnými body rozhodne vzájemný zápas, pak set diff, pak game diff
+  // 2) při shodě: vzájemný zápas → set diff → game diff
   const result: StandingRow[] = [];
   let i = 0;
   while (i < byPoints.length) {
@@ -102,7 +100,10 @@ function sortStandings(
   return result;
 }
 
-export function computeStandings(): StandingRow[] {
+export function computeStandings(
+  players: Player[],
+  matches: Match[],
+): StandingRow[] {
   const rows = new Map<string, StandingRow>();
   for (const p of players) rows.set(p.id, emptyRow(p.id));
 
@@ -116,18 +117,12 @@ export function computeStandings(): StandingRow[] {
   return sortStandings(Array.from(rows.values()), matches);
 }
 
-export function computeStandingsForGroup(group: Group): StandingRow[] {
-  const groupPlayers = getPlayersByGroup(group);
+export function computeStandingsForGroup(
+  group: Group,
+  players: Player[],
+  matches: Match[],
+): StandingRow[] {
+  const groupPlayers = players.filter((p) => p.group === group);
   const groupMatches = matches.filter((m) => m.group === group);
-  const rows = new Map<string, StandingRow>();
-  for (const p of groupPlayers) rows.set(p.id, emptyRow(p.id));
-
-  for (const m of groupMatches) {
-    const r1 = rows.get(m.player1Id);
-    const r2 = rows.get(m.player2Id);
-    if (r1) applyMatch(r1, m, true);
-    if (r2) applyMatch(r2, m, false);
-  }
-
-  return sortStandings(Array.from(rows.values()), groupMatches);
+  return computeStandings(groupPlayers, groupMatches);
 }

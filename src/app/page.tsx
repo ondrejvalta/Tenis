@@ -1,11 +1,12 @@
 import Link from "next/link";
+import { fetchMatches, fetchPlayers } from "@/lib/data";
 import { computeStandingsForGroup } from "@/data/standings";
-import { matches } from "@/data/matches";
-import { getPlayer, players } from "@/data/players";
 import { formatDate, formatScore } from "@/lib/format";
-import { GROUPS, type Group } from "@/data/types";
+import { GROUPS, type Group, type Match, type Player } from "@/data/types";
 
-export default function Home() {
+export default async function Home() {
+  const [players, matches] = await Promise.all([fetchPlayers(), fetchMatches()]);
+  const playersById = new Map(players.map((p) => [p.id, p]));
   const recentMatches = matches
     .slice()
     .sort((a, b) => b.date.localeCompare(a.date))
@@ -45,7 +46,13 @@ export default function Home() {
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {GROUPS.map((group) => (
-            <GroupTopCard key={group} group={group} />
+            <GroupTopCard
+              key={group}
+              group={group}
+              players={players}
+              matches={matches}
+              playersById={playersById}
+            />
           ))}
         </div>
       </section>
@@ -59,8 +66,8 @@ export default function Home() {
         </div>
         <ul className="space-y-2">
           {recentMatches.map((m) => {
-            const p1 = getPlayer(m.player1Id);
-            const p2 = getPlayer(m.player2Id);
+            const p1 = playersById.get(m.player1Id);
+            const p2 = playersById.get(m.player2Id);
             const p1Won = m.winnerId === m.player1Id;
             return (
               <li
@@ -86,8 +93,18 @@ export default function Home() {
   );
 }
 
-function GroupTopCard({ group }: { group: Group }) {
-  const top = computeStandingsForGroup(group).slice(0, 3);
+function GroupTopCard({
+  group,
+  players,
+  matches,
+  playersById,
+}: {
+  group: Group;
+  players: Player[];
+  matches: Match[];
+  playersById: Map<string, Player>;
+}) {
+  const top = computeStandingsForGroup(group, players, matches).slice(0, 3);
   return (
     <div className="overflow-hidden rounded-xl border border-neutral-200 bg-white">
       <div className="border-b border-neutral-100 bg-neutral-50 px-4 py-2 text-sm font-semibold">
@@ -96,7 +113,7 @@ function GroupTopCard({ group }: { group: Group }) {
       <table className="w-full text-sm">
         <tbody>
           {top.map((row, idx) => {
-            const p = getPlayer(row.playerId);
+            const p = playersById.get(row.playerId);
             return (
               <tr key={row.playerId} className="border-t border-neutral-100 first:border-t-0">
                 <td className="px-3 py-2 text-neutral-500">{idx + 1}</td>

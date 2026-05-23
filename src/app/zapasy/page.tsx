@@ -1,13 +1,15 @@
 import Link from "next/link";
-import { getMatchesByGroup, matches } from "@/data/matches";
-import { getPlayer } from "@/data/players";
+import { fetchMatches, fetchPlayers } from "@/lib/data";
 import { formatDate, formatScore } from "@/lib/format";
-import { GROUPS, type Group, type Match } from "@/data/types";
+import { GROUPS, type Group, type Match, type Player } from "@/data/types";
 import { Tabs } from "./Tabs";
 
 export const metadata = { title: "Zápasy | Tenisová liga Dobříš" };
 
-export default function ZapasyPage() {
+export default async function ZapasyPage() {
+  const [matches, players] = await Promise.all([fetchMatches(), fetchPlayers()]);
+  const playersById = new Map(players.map((p) => [p.id, p]));
+
   return (
     <div className="space-y-6">
       <div>
@@ -20,19 +22,33 @@ export default function ZapasyPage() {
       <Tabs
         tabs={GROUPS.map((g) => ({
           id: g,
-          label: `Skupina ${g} (${getMatchesByGroup(g).length})`,
+          label: `Skupina ${g} (${matches.filter((m) => m.group === g).length})`,
         }))}
       >
         {GROUPS.map((g) => (
-          <GroupMatches key={g} group={g} />
+          <GroupMatches
+            key={g}
+            group={g}
+            matches={matches}
+            playersById={playersById}
+          />
         ))}
       </Tabs>
     </div>
   );
 }
 
-function GroupMatches({ group }: { group: Group }) {
-  const sorted = getMatchesByGroup(group)
+function GroupMatches({
+  group,
+  matches,
+  playersById,
+}: {
+  group: Group;
+  matches: Match[];
+  playersById: Map<string, Player>;
+}) {
+  const sorted = matches
+    .filter((m) => m.group === group)
     .slice()
     .sort((a, b) => b.date.localeCompare(a.date));
 
@@ -80,8 +96,8 @@ function GroupMatches({ group }: { group: Group }) {
           </summary>
           <ul className="space-y-2 border-t border-neutral-100 p-3">
             {monthMatches.map((m) => {
-              const p1 = getPlayer(m.player1Id);
-              const p2 = getPlayer(m.player2Id);
+              const p1 = playersById.get(m.player1Id);
+              const p2 = playersById.get(m.player2Id);
               const p1Won = m.winnerId === m.player1Id;
               return (
                 <li

@@ -1,13 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getPlayer, players } from "@/data/players";
-import { getMatchesForPlayer } from "@/data/matches";
+import { fetchMatches, fetchPlayers } from "@/lib/data";
 import { computeStandingsForGroup } from "@/data/standings";
 import { formatDate, formatScore } from "@/lib/format";
-
-export function generateStaticParams() {
-  return players.map((p) => ({ id: p.id }));
-}
 
 export default async function HracDetail({
   params,
@@ -15,11 +10,16 @@ export default async function HracDetail({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const player = getPlayer(id);
+  const [players, matches] = await Promise.all([fetchPlayers(), fetchMatches()]);
+  const player = players.find((p) => p.id === id);
   if (!player) notFound();
 
-  const playerMatches = getMatchesForPlayer(id);
-  const standings = computeStandingsForGroup(player.group);
+  const playersById = new Map(players.map((p) => [p.id, p]));
+  const playerMatches = matches
+    .filter((m) => m.player1Id === id || m.player2Id === id)
+    .slice()
+    .sort((a, b) => b.date.localeCompare(a.date));
+  const standings = computeStandingsForGroup(player.group, players, matches);
   const myRow = standings.find((r) => r.playerId === id);
   const rank = standings.findIndex((r) => r.playerId === id) + 1;
 
@@ -56,7 +56,7 @@ export default async function HracDetail({
             {playerMatches.map((m) => {
               const isP1 = m.player1Id === id;
               const opponentId = isP1 ? m.player2Id : m.player1Id;
-              const opponent = getPlayer(opponentId);
+              const opponent = playersById.get(opponentId);
               const won = m.winnerId === id;
               return (
                 <li

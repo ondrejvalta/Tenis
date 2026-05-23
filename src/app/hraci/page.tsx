@@ -1,12 +1,14 @@
 import Link from "next/link";
-import { getPlayersByGroup, players } from "@/data/players";
+import { fetchMatches, fetchPlayers } from "@/lib/data";
 import { computeStandingsForGroup } from "@/data/standings";
 import { formatDate } from "@/lib/format";
-import { GROUPS, type Group } from "@/data/types";
+import { GROUPS, type Group, type Match, type Player } from "@/data/types";
 
 export const metadata = { title: "Hráči | Tenisová liga Dobříš" };
 
-export default function HraciPage() {
+export default async function HraciPage() {
+  const [players, matches] = await Promise.all([fetchPlayers(), fetchMatches()]);
+
   return (
     <div className="space-y-8">
       <div>
@@ -17,15 +19,28 @@ export default function HraciPage() {
       </div>
 
       {GROUPS.map((group) => (
-        <GroupSection key={group} group={group} />
+        <GroupSection
+          key={group}
+          group={group}
+          players={players}
+          matches={matches}
+        />
       ))}
     </div>
   );
 }
 
-function GroupSection({ group }: { group: Group }) {
-  const groupPlayers = getPlayersByGroup(group);
-  const standings = computeStandingsForGroup(group);
+function GroupSection({
+  group,
+  players,
+  matches,
+}: {
+  group: Group;
+  players: Player[];
+  matches: Match[];
+}) {
+  const groupPlayers = players.filter((p) => p.group === group);
+  const standings = computeStandingsForGroup(group, players, matches);
   const statsById = new Map(standings.map((s) => [s.playerId, s]));
   const sorted = groupPlayers
     .slice()
