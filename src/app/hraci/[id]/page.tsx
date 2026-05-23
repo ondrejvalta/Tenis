@@ -31,7 +31,7 @@ export default async function HracDetail({
         </Link>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight">{player.name}</h1>
         <p className="mt-1 text-sm text-neutral-600">
-          Skupina {player.group} · V lize od {formatDate(player.joinedAt)}
+          Skupina {player.group}
         </p>
       </div>
 
@@ -79,7 +79,14 @@ export default async function HracDetail({
                       {opponent?.name ?? opponentId}
                     </Link>
                   </div>
-                  <span className="font-mono text-neutral-700">{formatScore(m, isP1)}</span>
+                  <div className="flex items-center gap-2">
+                    {m.forfeit && (
+                      <span className="rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-800">
+                        kont.
+                      </span>
+                    )}
+                    <span className="font-mono text-neutral-700">{formatScore(m, isP1)}</span>
+                  </div>
                 </li>
               );
             })}

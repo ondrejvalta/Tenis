@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { fetchMatches, fetchPlayers } from "@/lib/data";
 import { computeStandingsForGroup } from "@/data/standings";
-import { formatDate } from "@/lib/format";
 import { GROUPS, type Group, type Match, type Player } from "@/data/types";
 
 export const metadata = { title: "Hráči | Tenisová liga Dobříš" };
@@ -14,7 +13,8 @@ export default async function HraciPage() {
       <div>
         <h1 className="text-3xl font-semibold tracking-tight">Hráči</h1>
         <p className="mt-1 text-sm text-neutral-600">
-          Seznam všech {players.length} hráčů ligy, rozdělených do tří skupin.
+          Každý hráč má svůj příběh. Sledujte profily všech {players.length}{" "}
+          účastníků ligy, jejich úspěšnost, odehrané zápasy a statistiky sezóny.
         </p>
       </div>
 
@@ -66,9 +66,6 @@ function GroupSection({
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="font-semibold">{p.name}</div>
-                    <div className="mt-0.5 text-xs text-neutral-500">
-                      V lize od {formatDate(p.joinedAt)}
-                    </div>
                   </div>
                   {s && (
                     <div className="text-right text-sm">

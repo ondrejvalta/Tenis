@@ -50,11 +50,18 @@ async function parseForm(
   const player1_id = String(formData.get("player1_id") ?? "");
   const player2_id = String(formData.get("player2_id") ?? "");
   const forfeit = formData.get("forfeit") === "on";
+  const forfeit_player_id = String(formData.get("forfeit_player_id") ?? "");
 
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return { error: "Datum je povinné." };
   if (!VALID_GROUPS.includes(group)) return { error: "Neplatná skupina." };
   if (!player1_id || !player2_id) return { error: "Vyber oba hráče." };
   if (player1_id === player2_id) return { error: "Hráči musí být různí." };
+  if (forfeit) {
+    if (!forfeit_player_id)
+      return { error: "Vyber kontumovaného hráče." };
+    if (forfeit_player_id !== player1_id && forfeit_player_id !== player2_id)
+      return { error: "Kontumovaný hráč musí být Hráč 1 nebo Hráč 2." };
+  }
 
   const supabase = await createClient();
   const { data: pls } = await supabase
@@ -73,13 +80,13 @@ async function parseForm(
   for (let i = 1; i <= 3; i++) {
     const p1 = parseInt0(formData.get(`set${i}_p1`));
     const p2 = parseInt0(formData.get(`set${i}_p2`));
-    const tbp1 = parseIntNullable(formData.get(`set${i}_tb_p1`));
-    const tbp2 = parseIntNullable(formData.get(`set${i}_tb_p2`));
-    const isSuper = formData.get(`set${i}_super`) === "on";
+    const isSuper = i === 3;
+    const tbp1 = isSuper ? null : parseIntNullable(formData.get(`set${i}_tb_p1`));
+    const tbp2 = isSuper ? null : parseIntNullable(formData.get(`set${i}_tb_p2`));
 
-    const filled = p1 > 0 || p2 > 0 || isSuper;
+    const filled = p1 > 0 || p2 > 0;
     if (!filled) {
-      if (i <= 2) return { error: `Sety 1 a 2 jsou povinné.` };
+      if (i <= 2 && !forfeit) return { error: `Sety 1 a 2 jsou povinné.` };
       continue;
     }
     if (p1 === p2)
@@ -97,11 +104,17 @@ async function parseForm(
     else p2SetsWon++;
   }
 
-  if (sets.length < 2) return { error: "Zápas musí mít aspoň 2 sety." };
-  if (p1SetsWon === p2SetsWon)
-    return { error: "Zápas nemůže skončit nerozhodně." };
+  if (!forfeit && sets.length < 2)
+    return { error: "Zápas musí mít aspoň 2 sety." };
 
-  const winner_id = p1SetsWon > p2SetsWon ? player1_id : player2_id;
+  let winner_id: string;
+  if (forfeit) {
+    winner_id = forfeit_player_id === player1_id ? player2_id : player1_id;
+  } else {
+    if (p1SetsWon === p2SetsWon)
+      return { error: "Zápas nemůže skončit nerozhodně." };
+    winner_id = p1SetsWon > p2SetsWon ? player1_id : player2_id;
+  }
 
   return {
     date,

@@ -1,12 +1,14 @@
 import Link from "next/link";
+import Image from "next/image";
 import { getCurrentUser, isCurrentUserAdmin } from "@/lib/auth";
 import { logoutAction } from "@/app/prihlaseni/actions";
 
 const links = [
   { href: "/", label: "Přehled" },
   { href: "/zebricek", label: "Žebříček" },
-  { href: "/hraci", label: "Hráči" },
   { href: "/zapasy", label: "Zápasy" },
+  { href: "/hraci", label: "Hráči" },
+  { href: "/pravidla", label: "Pravidla" },
 ];
 
 export async function Nav() {
@@ -17,7 +19,7 @@ export async function Nav() {
     <header className="border-b border-neutral-200 bg-white">
       <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
         <Link href="/" className="flex items-center gap-2 text-lg font-semibold">
-          <span className="inline-block h-3 w-3 rounded-full bg-lime-500" />
+          <Image src="/logo_tenis_dobris.png" alt="Logo" width={32} height={32} className="h-8 w-8 object-contain" />
           Tenisová liga Dobříš
         </Link>
         <nav className="flex items-center gap-1 text-sm">

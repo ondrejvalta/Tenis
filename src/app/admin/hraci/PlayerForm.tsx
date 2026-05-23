@@ -16,7 +16,7 @@ export function PlayerForm({
   submitLabel,
 }: {
   action: Action;
-  initial?: { name: string; group: Group; joinedAt: string };
+  initial?: { name: string; group: Group };
   submitLabel: string;
 }) {
   const [state, formAction, pending] = useActionState<PlayerFormState, FormData>(
@@ -52,18 +52,6 @@ export function PlayerForm({
             </option>
           ))}
         </select>
-      </div>
-      <div>
-        <label className="mb-1 block text-sm font-medium text-neutral-700">
-          V lize od
-        </label>
-        <input
-          name="joined_at"
-          type="date"
-          required
-          defaultValue={initial?.joinedAt ?? new Date().toISOString().slice(0, 10)}
-          className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
-        />
       </div>
       {state?.error && (
         <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">

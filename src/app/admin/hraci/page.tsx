@@ -57,7 +57,7 @@ export default async function AdminPlayersPage({
                   <div>
                     <div className="font-medium">{p.name}</div>
                     <div className="text-xs text-neutral-500">
-                      {p.id} · v lize od {p.joinedAt}
+                      {p.id}
                     </div>
                   </div>
                   <div className="flex gap-2">

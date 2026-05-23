@@ -29,6 +29,11 @@ export default async function EditMatchPage({
           player1Id: match.player1Id,
           player2Id: match.player2Id,
           forfeit: !!match.forfeit,
+          forfeitPlayerId: match.forfeit
+            ? match.winnerId === match.player1Id
+              ? match.player2Id
+              : match.player1Id
+            : undefined,
           sets: match.sets,
         }}
         submitLabel="Uložit změny"
