@@ -2,25 +2,12 @@
 
 import Link from "next/link";
 import { useActionState } from "react";
-import { GROUPS, type Group } from "@/data/types";
-import type { PlayerFormState } from "./actions";
+import { GROUPS } from "@/data/types";
+import { createPlayer, type PlayerFormState } from "../actions";
 
-type Action = (
-  state: PlayerFormState,
-  formData: FormData,
-) => Promise<PlayerFormState>;
-
-export function PlayerForm({
-  action,
-  initial,
-  submitLabel,
-}: {
-  action: Action;
-  initial?: { name: string; group: Group };
-  submitLabel: string;
-}) {
+export function NewPlayerForm() {
   const [state, formAction, pending] = useActionState<PlayerFormState, FormData>(
-    action,
+    createPlayer,
     undefined,
   );
 
@@ -33,7 +20,6 @@ export function PlayerForm({
         <input
           name="name"
           required
-          defaultValue={initial?.name ?? ""}
           className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-lime-600 focus:outline-none focus:ring-1 focus:ring-lime-600"
         />
       </div>
@@ -43,7 +29,7 @@ export function PlayerForm({
         </label>
         <select
           name="group"
-          defaultValue={initial?.group ?? "1A"}
+          defaultValue="3"
           className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
         >
           {GROUPS.map((g) => (
@@ -64,7 +50,7 @@ export function PlayerForm({
           disabled={pending}
           className="rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 disabled:opacity-60"
         >
-          {pending ? "Ukládám…" : submitLabel}
+          {pending ? "Ukládám…" : "Vytvořit"}
         </button>
         <Link
           href="/admin/hraci"

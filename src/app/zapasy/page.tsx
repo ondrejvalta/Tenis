@@ -15,7 +15,8 @@ export default async function ZapasyPage() {
       <div>
         <h1 className="text-3xl font-semibold tracking-tight">Zápasy</h1>
         <p className="mt-1 text-sm text-neutral-600">
-          Všech {matches.length} odehraných zápasů, rozdělených do tří skupin.
+          {matches.length} odehraných utkání, aktuální výsledky a kompletní
+          přehled zápasů napříč všemi skupinami ligy.
         </p>
       </div>
 
@@ -120,7 +121,14 @@ function GroupMatches({
                       {p2?.name}
                     </Link>
                   </div>
-                  <span className="font-mono text-neutral-700">{formatScore(m)}</span>
+                  <div className="flex items-center gap-2">
+                    {m.forfeit && (
+                      <span className="rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-800">
+                        kont.
+                      </span>
+                    )}
+                    <span className="font-mono text-neutral-700">{formatScore(m)}</span>
+                  </div>
                 </li>
               );
             })}

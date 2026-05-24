@@ -127,9 +127,9 @@ export type Database = {
           name: string
         }
         Insert: {
-          group: Database["public"]["Enums"]["league_group"]
+          group?: Database["public"]["Enums"]["league_group"]
           id: string
-          joined_at: string
+          joined_at?: string
           name: string
         }
         Update: {
@@ -145,7 +145,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
       league_group: "1A" | "1B" | "2" | "3"

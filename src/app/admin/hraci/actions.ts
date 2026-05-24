@@ -12,19 +12,6 @@ const VALID_GROUPS: Group[] = ["1A", "1B", "2", "3"];
 
 export type PlayerFormState = { error?: string } | undefined;
 
-function parseForm(formData: FormData) {
-  const name = String(formData.get("name") ?? "").trim();
-  const group = String(formData.get("group") ?? "") as Group;
-  const joinedAt = String(formData.get("joined_at") ?? "").trim();
-
-  if (!name) return { error: "Jméno je povinné." } as const;
-  if (!VALID_GROUPS.includes(group)) return { error: "Neplatná skupina." } as const;
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(joinedAt))
-    return { error: "Datum vstupu do ligy je povinné." } as const;
-
-  return { name, group, joinedAt } as const;
-}
-
 async function pickFreeId(base: string): Promise<string> {
   const supabase = await createClient();
   let id = base || "hrac";
@@ -45,17 +32,15 @@ export async function createPlayer(
   formData: FormData,
 ): Promise<PlayerFormState> {
   await requireAdmin();
-  const parsed = parseForm(formData);
-  if ("error" in parsed) return { error: parsed.error };
+  const name = String(formData.get("name") ?? "").trim();
+  const group = String(formData.get("group") ?? "") as Group;
+  if (!name) return { error: "Jméno je povinné." };
+  if (!VALID_GROUPS.includes(group))
+    return { error: "Neplatná skupina." };
 
-  const id = await pickFreeId(slugify(parsed.name));
+  const id = await pickFreeId(slugify(name));
   const supabase = await createClient();
-  const { error } = await supabase.from("players").insert({
-    id,
-    name: parsed.name,
-    group: parsed.group,
-    joined_at: parsed.joinedAt,
-  });
+  const { error } = await supabase.from("players").insert({ id, name, group });
   if (error) return { error: error.message };
 
   revalidatePath("/admin/hraci");
@@ -71,17 +56,16 @@ export async function updatePlayer(
   formData: FormData,
 ): Promise<PlayerFormState> {
   await requireAdmin();
-  const parsed = parseForm(formData);
-  if ("error" in parsed) return { error: parsed.error };
+  const name = String(formData.get("name") ?? "").trim();
+  const group = String(formData.get("group") ?? "") as Group;
+  if (!name) return { error: "Jméno je povinné." };
+  if (!VALID_GROUPS.includes(group))
+    return { error: "Neplatná skupina." };
 
   const supabase = await createClient();
   const { error } = await supabase
     .from("players")
-    .update({
-      name: parsed.name,
-      group: parsed.group,
-      joined_at: parsed.joinedAt,
-    })
+    .update({ name, group })
     .eq("id", id);
   if (error) return { error: error.message };
 

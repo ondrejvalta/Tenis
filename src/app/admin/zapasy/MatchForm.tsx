@@ -24,6 +24,7 @@ export function MatchForm({
     player1Id: string;
     player2Id: string;
     forfeit: boolean;
+    forfeitPlayerId?: string;
     sets: SetScore[];
   };
   submitLabel: string;
@@ -34,6 +35,12 @@ export function MatchForm({
   );
 
   const [group, setGroup] = useState<Group>(initial?.group ?? "1A");
+  const [player1Id, setPlayer1Id] = useState<string>(initial?.player1Id ?? "");
+  const [player2Id, setPlayer2Id] = useState<string>(initial?.player2Id ?? "");
+  const [forfeit, setForfeit] = useState<boolean>(initial?.forfeit ?? false);
+  const [forfeitPlayerId, setForfeitPlayerId] = useState<string>(
+    initial?.forfeitPlayerId ?? "",
+  );
   const playersInGroup = useMemo(
     () =>
       players
@@ -41,6 +48,11 @@ export function MatchForm({
         .sort((a, b) => a.name.localeCompare(b.name, "cs")),
     [players, group],
   );
+  const playerNameById = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const p of players) m.set(p.id, p.name);
+    return m;
+  }, [players]);
 
   const initSets: SetScore[] = initial?.sets ?? [
     { p1: 0, p2: 0 },
@@ -92,7 +104,13 @@ export function MatchForm({
           <select
             name="player1_id"
             required
-            defaultValue={initial?.player1Id ?? ""}
+            value={player1Id}
+            onChange={(e) => {
+              setPlayer1Id(e.target.value);
+              if (forfeitPlayerId && forfeitPlayerId !== e.target.value && forfeitPlayerId !== player2Id) {
+                setForfeitPlayerId("");
+              }
+            }}
             className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
           >
             <option value="">— vyber —</option>
@@ -110,7 +128,13 @@ export function MatchForm({
           <select
             name="player2_id"
             required
-            defaultValue={initial?.player2Id ?? ""}
+            value={player2Id}
+            onChange={(e) => {
+              setPlayer2Id(e.target.value);
+              if (forfeitPlayerId && forfeitPlayerId !== e.target.value && forfeitPlayerId !== player1Id) {
+                setForfeitPlayerId("");
+              }
+            }}
             className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
           >
             <option value="">— vyber —</option>
@@ -128,10 +152,10 @@ export function MatchForm({
           Sety
         </legend>
         <p className="text-xs text-neutral-500">
-          Sety 1 a 2 jsou povinné, set 3 jen za stavu 1:1. Tiebreak / super
-          tiebreak vyplň jen pokud byl.
+          Sety 1 a 2 jsou povinné (kromě kontumace), set 3 (Super TB) jen za
+          stavu 1:1. Tiebreak vyplň jen pokud byl.
         </p>
-        {[1, 2, 3].map((i) => {
+        {[1, 2].map((i) => {
           const s = get(i - 1);
           return (
             <div
@@ -179,30 +203,81 @@ export function MatchForm({
                   className="w-full rounded-md border border-neutral-300 px-2 py-1.5 text-sm"
                 />
               </div>
-              <div className="col-span-3 flex items-center gap-1.5">
-                <input
-                  id={`set${i}_super`}
-                  name={`set${i}_super`}
-                  type="checkbox"
-                  defaultChecked={s?.superTiebreak ?? false}
-                />
-                <label htmlFor={`set${i}_super`} className="text-xs text-neutral-600">
-                  Super TB
-                </label>
-              </div>
             </div>
           );
         })}
+        {(() => {
+          const s = get(2);
+          return (
+            <div className="grid grid-cols-12 items-end gap-2 border-t border-neutral-100 pt-3">
+              <div className="col-span-3 text-sm text-neutral-500">
+                3. Super TB
+              </div>
+              <div className="col-span-3">
+                <label className="block text-xs text-neutral-500">P1 body</label>
+                <input
+                  name="set3_p1"
+                  type="number"
+                  min={0}
+                  defaultValue={s?.p1 ?? ""}
+                  className="w-full rounded-md border border-neutral-300 px-2 py-1.5 text-sm"
+                />
+              </div>
+              <div className="col-span-3">
+                <label className="block text-xs text-neutral-500">P2 body</label>
+                <input
+                  name="set3_p2"
+                  type="number"
+                  min={0}
+                  defaultValue={s?.p2 ?? ""}
+                  className="w-full rounded-md border border-neutral-300 px-2 py-1.5 text-sm"
+                />
+              </div>
+            </div>
+          );
+        })()}
       </fieldset>
 
-      <label className="flex items-center gap-2 text-sm">
-        <input
-          name="forfeit"
-          type="checkbox"
-          defaultChecked={initial?.forfeit ?? false}
-        />
-        Kontumace (poražený dostane 0 bodů místo 1)
-      </label>
+      <div className="space-y-2">
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            name="forfeit"
+            type="checkbox"
+            checked={forfeit}
+            onChange={(e) => {
+              setForfeit(e.target.checked);
+              if (!e.target.checked) setForfeitPlayerId("");
+            }}
+          />
+          Kontumace (vybraný hráč dostane 0 bodů místo 1)
+        </label>
+        {forfeit && (
+          <div>
+            <label className="mb-1 block text-sm font-medium text-neutral-700">
+              Kontumovaný hráč
+            </label>
+            <select
+              name="forfeit_player_id"
+              required={forfeit}
+              value={forfeitPlayerId}
+              onChange={(e) => setForfeitPlayerId(e.target.value)}
+              className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
+            >
+              <option value="">— vyber —</option>
+              {player1Id && (
+                <option value={player1Id}>
+                  Hráč 1{playerNameById.get(player1Id) ? ` — ${playerNameById.get(player1Id)}` : ""}
+                </option>
+              )}
+              {player2Id && (
+                <option value={player2Id}>
+                  Hráč 2{playerNameById.get(player2Id) ? ` — ${playerNameById.get(player2Id)}` : ""}
+                </option>
+              )}
+            </select>
+          </div>
+        )}
+      </div>
 
       {state?.error && (
         <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">

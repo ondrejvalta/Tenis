@@ -20,14 +20,8 @@ export default async function ZebricekPage() {
       <div>
         <h1 className="text-3xl font-semibold tracking-tight">Žebříček</h1>
         <p className="mt-1 text-sm text-neutral-600">
-          Bodování: výhra = 3 body, prohra = 1 bod, kontumace = 0 bodů.
-          Při shodě bodů rozhoduje vzájemný zápas, poté rozdíl setů a poté
-          rozdíl gamů.
-        </p>
-        <p className="mt-2 text-sm text-neutral-600">
-          Zápasy se hrají podle platných pravidel ČTS. Zápas se hraje na 2
-          vítězné sety. Za stavu 1:1 na sety následuje supertiebreak do 10
-          bodů — vítěz musí vyhrát alespoň o 2 body (např. i 13:11).
+          Každý bod může rozhodnout o konečném pořadí. Sledujte průběžné
+          výsledky, aktuální pořadí hráčů i vývoj celé tabulky v průběhu ligy.
         </p>
       </div>
 
