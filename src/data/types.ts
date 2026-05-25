@@ -1,6 +1,6 @@
-export type Group = "1A" | "1B" | "2" | "3";
+export type Group = "A" | "B" | "C" | "D";
 
-export const GROUPS: Group[] = ["1A", "1B", "2", "3"];
+export const GROUPS: Group[] = ["A", "B", "C", "D"];
 
 export type Player = {
   id: string;

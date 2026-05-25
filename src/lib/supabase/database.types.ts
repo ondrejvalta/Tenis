@@ -148,7 +148,7 @@ export type Database = {
       is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
-      league_group: "1A" | "1B" | "2" | "3"
+      league_group: "A" | "B" | "C" | "D"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -276,7 +276,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      league_group: ["1A", "1B", "2", "3"],
+      league_group: ["A", "B", "C", "D"],
     },
   },
 } as const
