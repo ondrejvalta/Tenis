@@ -103,32 +103,34 @@ function GroupMatches({
               return (
                 <li
                   key={m.id}
-                  className="flex items-center justify-between rounded-md border border-neutral-200 bg-white px-4 py-2.5 text-sm"
+                  className="rounded-md border border-neutral-200 bg-white px-4 py-2.5 text-sm"
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="w-24 text-neutral-500">{formatDate(m.date)}</span>
-                    <Link
-                      href={`/hraci/${m.player1Id}`}
-                      className={`hover:underline ${p1Won ? "font-semibold" : ""}`}
-                    >
-                      {p1?.name}
-                    </Link>
-                    <span className="text-neutral-400">vs.</span>
-                    <Link
-                      href={`/hraci/${m.player2Id}`}
-                      className={`hover:underline ${!p1Won ? "font-semibold" : ""}`}
-                    >
-                      {p2?.name}
-                    </Link>
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5">
+                      <Link
+                        href={`/hraci/${m.player1Id}`}
+                        className={`hover:underline ${p1Won ? "font-semibold" : ""}`}
+                      >
+                        {p1?.name}
+                      </Link>
+                      <span className="text-neutral-400">vs.</span>
+                      <Link
+                        href={`/hraci/${m.player2Id}`}
+                        className={`hover:underline ${!p1Won ? "font-semibold" : ""}`}
+                      >
+                        {p2?.name}
+                      </Link>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-2">
+                      {m.forfeit && (
+                        <span className="rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-800">
+                          kont.
+                        </span>
+                      )}
+                      <span className="font-mono text-neutral-700">{formatScore(m)}</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    {m.forfeit && (
-                      <span className="rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-800">
-                        kont.
-                      </span>
-                    )}
-                    <span className="font-mono text-neutral-700">{formatScore(m)}</span>
-                  </div>
+                  <div className="mt-1 text-xs text-neutral-500">{formatDate(m.date)}</div>
                 </li>
               );
             })}

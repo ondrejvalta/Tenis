@@ -61,32 +61,34 @@ export default async function HracDetail({
               return (
                 <li
                   key={m.id}
-                  className="flex items-center justify-between rounded-lg border border-neutral-200 bg-white px-4 py-3 text-sm"
+                  className="rounded-lg border border-neutral-200 bg-white px-4 py-3 text-sm"
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="text-neutral-500">{formatDate(m.date)}</span>
-                    <span
-                      className={
-                        won
-                          ? "rounded bg-emerald-100 px-1.5 py-0.5 text-xs font-semibold text-emerald-700"
-                          : "rounded bg-rose-100 px-1.5 py-0.5 text-xs font-semibold text-rose-700"
-                      }
-                    >
-                      {won ? "V" : "P"}
-                    </span>
-                    <span className="text-neutral-400">vs.</span>
-                    <Link href={`/hraci/${opponentId}`} className="font-medium hover:underline">
-                      {opponent?.name ?? opponentId}
-                    </Link>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {m.forfeit && (
-                      <span className="rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-800">
-                        kont.
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex min-w-0 items-center gap-2">
+                      <span
+                        className={
+                          won
+                            ? "shrink-0 rounded bg-emerald-100 px-1.5 py-0.5 text-xs font-semibold text-emerald-700"
+                            : "shrink-0 rounded bg-rose-100 px-1.5 py-0.5 text-xs font-semibold text-rose-700"
+                        }
+                      >
+                        {won ? "V" : "P"}
                       </span>
-                    )}
-                    <span className="font-mono text-neutral-700">{formatScore(m, isP1)}</span>
+                      <span className="text-neutral-400">vs.</span>
+                      <Link href={`/hraci/${opponentId}`} className="min-w-0 truncate font-medium hover:underline">
+                        {opponent?.name ?? opponentId}
+                      </Link>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-2">
+                      {m.forfeit && (
+                        <span className="rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-800">
+                          kont.
+                        </span>
+                      )}
+                      <span className="font-mono text-neutral-700">{formatScore(m, isP1)}</span>
+                    </div>
                   </div>
+                  <div className="mt-1 text-xs text-neutral-500">{formatDate(m.date)}</div>
                 </li>
               );
             })}

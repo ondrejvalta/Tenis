@@ -43,7 +43,7 @@ export function PlayerForm({
         </label>
         <select
           name="group"
-          defaultValue={initial?.group ?? "1A"}
+          defaultValue={initial?.group ?? "A"}
           className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
         >
           {GROUPS.map((g) => (

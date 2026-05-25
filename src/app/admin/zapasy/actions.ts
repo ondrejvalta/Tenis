@@ -7,7 +7,7 @@ import { requireAdmin } from "@/lib/auth";
 import type { Database } from "@/lib/supabase/database.types";
 
 type Group = Database["public"]["Enums"]["league_group"];
-const VALID_GROUPS: Group[] = ["1A", "1B", "2", "3"];
+const VALID_GROUPS: Group[] = ["A", "B", "C", "D"];
 
 export type MatchFormState = { error?: string } | undefined;
 

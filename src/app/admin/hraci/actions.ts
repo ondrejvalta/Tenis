@@ -8,7 +8,7 @@ import { slugify } from "@/lib/slug";
 import type { Database } from "@/lib/supabase/database.types";
 
 type Group = Database["public"]["Enums"]["league_group"];
-const VALID_GROUPS: Group[] = ["1A", "1B", "2", "3"];
+const VALID_GROUPS: Group[] = ["A", "B", "C", "D"];
 
 export type PlayerFormState = { error?: string } | undefined;
 
@@ -83,13 +83,11 @@ export async function deletePlayer(formData: FormData) {
   if (!id) return;
 
   const supabase = await createClient();
-  const { count } = await supabase
+  const { error: matchesError } = await supabase
     .from("matches")
-    .select("id", { count: "exact", head: true })
+    .delete()
     .or(`player1_id.eq.${id},player2_id.eq.${id}`);
-  if ((count ?? 0) > 0) {
-    redirect("/admin/hraci?error=has_matches");
-  }
+  if (matchesError) redirect(`/admin/hraci?error=${encodeURIComponent(matchesError.message)}`);
 
   const { error } = await supabase.from("players").delete().eq("id", id);
   if (error) redirect(`/admin/hraci?error=${encodeURIComponent(error.message)}`);

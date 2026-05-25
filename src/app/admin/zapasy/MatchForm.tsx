@@ -34,7 +34,7 @@ export function MatchForm({
     undefined,
   );
 
-  const [group, setGroup] = useState<Group>(initial?.group ?? "1A");
+  const [group, setGroup] = useState<Group>(initial?.group ?? "A");
   const [player1Id, setPlayer1Id] = useState<string>(initial?.player1Id ?? "");
   const [player2Id, setPlayer2Id] = useState<string>(initial?.player2Id ?? "");
   const [forfeit, setForfeit] = useState<boolean>(initial?.forfeit ?? false);

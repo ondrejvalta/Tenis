@@ -14,19 +14,15 @@ export default async function Home() {
 
   return (
     <div className="space-y-10">
-      <section className="rounded-xl border border-neutral-200 bg-white p-8">
-        <h1 className="text-3xl font-semibold tracking-tight">Tenisová liga Dobříš</h1>
+      <section className="rounded-xl border border-neutral-200 bg-white p-5 sm:p-8">
+        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Amatérská tenisová liga Dobříš</h1>
         <p className="mt-2 max-w-2xl text-neutral-600">
           Amatérská tenisová liga pro hráče všech úrovní. Čtyři skupiny,
           napínavé zápasy a aktuální žebříčky na jednom místě. Sledujte
           výsledky, statistiky i profily hráčů a mějte přehled o dění v celé
           lize.
         </p>
-        <p className="mt-2 max-w-2xl text-neutral-600">
-          Aktuálně hraje {players.length} hráčů a bylo odehráno{" "}
-          {matches.length} zápasů.
-        </p>
-        <div className="mt-4 flex gap-3">
+        <div className="mt-4 flex flex-wrap gap-3">
           <Link
             href="/zebricek"
             className="rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800"
@@ -77,24 +73,28 @@ export default async function Home() {
             return (
               <li
                 key={m.id}
-                className="flex items-center justify-between rounded-lg border border-neutral-200 bg-white px-4 py-3 text-sm"
+                className="rounded-lg border border-neutral-200 bg-white px-4 py-3 text-sm"
               >
-                <div className="flex items-center gap-3">
-                  <span className="text-neutral-500">{formatDate(m.date)}</span>
-                  <span className="rounded bg-neutral-100 px-1.5 py-0.5 text-xs font-medium text-neutral-700">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5">
+                    <span className={`truncate ${p1Won ? "font-semibold" : ""}`}>{p1?.name}</span>
+                    <span className="text-neutral-400">vs.</span>
+                    <span className={`truncate ${!p1Won ? "font-semibold" : ""}`}>{p2?.name}</span>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-2">
+                    {m.forfeit && (
+                      <span className="rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-800">
+                        kont.
+                      </span>
+                    )}
+                    <span className="font-mono text-neutral-700">{formatScore(m)}</span>
+                  </div>
+                </div>
+                <div className="mt-1 flex items-center gap-2 text-xs text-neutral-500">
+                  <span>{formatDate(m.date)}</span>
+                  <span className="rounded bg-neutral-100 px-1.5 py-0.5 font-medium text-neutral-700">
                     Sk. {m.group}
                   </span>
-                  <span className={p1Won ? "font-semibold" : ""}>{p1?.name}</span>
-                  <span className="text-neutral-400">vs.</span>
-                  <span className={!p1Won ? "font-semibold" : ""}>{p2?.name}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  {m.forfeit && (
-                    <span className="rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-800">
-                      kont.
-                    </span>
-                  )}
-                  <span className="font-mono text-neutral-700">{formatScore(m)}</span>
                 </div>
               </li>
             );
@@ -129,12 +129,12 @@ function GroupTopCard({
             return (
               <tr key={row.playerId} className="border-t border-neutral-100 first:border-t-0">
                 <td className="px-3 py-2 text-neutral-500">{idx + 1}</td>
-                <td className="px-3 py-2 font-medium">
-                  <Link href={`/hraci/${row.playerId}`} className="hover:underline">
+                <td className="w-full max-w-0 px-3 py-2 font-medium">
+                  <Link href={`/hraci/${row.playerId}`} className="block truncate hover:underline">
                     {p?.name ?? row.playerId}
                   </Link>
                 </td>
-                <td className="px-3 py-2 text-right font-semibold">{row.points} b.</td>
+                <td className="whitespace-nowrap px-3 py-2 text-right font-semibold">{row.points} b.</td>
               </tr>
             );
           })}
