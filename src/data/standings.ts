@@ -31,6 +31,12 @@ function applyMatch(row: StandingRow, match: Match, isPlayer1: boolean): void {
     else if (opp > my) row.setsLost += 1;
   }
 
+  const hasSuperTiebreak = match.sets.some((s) => s.superTiebreak);
+  if (hasSuperTiebreak) {
+    if (won) row.gamesWon += 1;
+    else row.gamesLost += 1;
+  }
+
   // Bodování: výhra 3 b., prohra 1 b., kontumace (prohra) 0 b.
   if (won) {
     row.points += 3;

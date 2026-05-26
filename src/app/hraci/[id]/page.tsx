@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { fetchMatches, fetchPlayers } from "@/lib/data";
 import { computeStandingsForGroup } from "@/data/standings";
-import { formatDate, formatScore } from "@/lib/format";
+import { formatScore } from "@/lib/format";
 
 export default async function HracDetail({
   params,
@@ -88,7 +88,6 @@ export default async function HracDetail({
                       <span className="font-mono text-neutral-700">{formatScore(m, isP1)}</span>
                     </div>
                   </div>
-                  <div className="mt-1 text-xs text-neutral-500">{formatDate(m.date)}</div>
                 </li>
               );
             })}

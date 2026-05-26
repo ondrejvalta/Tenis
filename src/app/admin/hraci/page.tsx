@@ -2,6 +2,7 @@ import Link from "next/link";
 import { fetchPlayers } from "@/lib/data";
 import { GROUPS } from "@/data/types";
 import { deletePlayer } from "./actions";
+import { DeleteButton } from "@/components/DeleteButton";
 
 export const metadata = { title: "Správa hráčů – Administrace" };
 
@@ -67,15 +68,7 @@ export default async function AdminPlayersPage({
                     >
                       Upravit
                     </Link>
-                    <form action={deletePlayer}>
-                      <input type="hidden" name="id" value={p.id} />
-                      <button
-                        type="submit"
-                        className="rounded-md border border-red-200 bg-white px-3 py-1 text-xs text-red-700 hover:bg-red-50"
-                      >
-                        Smazat
-                      </button>
-                    </form>
+                    <DeleteButton action={deletePlayer} id={p.id} confirm="Opravdu chceš smazat tohoto hráče?" />
                   </div>
                 </li>
               ))}

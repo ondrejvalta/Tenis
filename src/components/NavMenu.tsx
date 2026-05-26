@@ -40,7 +40,7 @@ export function NavMenu({
           </Link>
         )}
         {user ? (
-          <form action={logoutAction}>
+          <form action={logoutAction} onSubmit={(e) => { if (!window.confirm("Opravdu se chceš odhlásit?")) e.preventDefault(); }}>
             <button
               type="submit"
               className="rounded-md px-3 py-1.5 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900"
@@ -101,7 +101,7 @@ export function NavMenu({
             )}
             <div className="mt-1 border-t border-neutral-100 pt-1">
               {user ? (
-                <form action={logoutAction}>
+                <form action={logoutAction} onSubmit={(e) => { if (!window.confirm("Opravdu se chceš odhlásit?")) e.preventDefault(); }}>
                   <button
                     type="submit"
                     className="w-full rounded-md px-3 py-2.5 text-left text-neutral-500 hover:bg-neutral-100"
