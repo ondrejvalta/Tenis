@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { fetchMatches, fetchPlayers } from "@/lib/data";
 import { computeStandingsForGroup } from "@/data/standings";
-import { formatDate, formatScore } from "@/lib/format";
+import { formatScore } from "@/lib/format";
 import { GROUPS, type Group, type Match, type Player } from "@/data/types";
 
 export default async function Home() {
@@ -77,6 +77,7 @@ export default async function Home() {
               >
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5">
+                    <span className="rounded bg-neutral-100 px-1.5 py-0.5 text-xs font-medium text-neutral-600 shrink-0">Sk. {m.group}</span>
                     <span className={`truncate ${p1Won ? "font-semibold" : ""}`}>{p1?.name}</span>
                     <span className="text-neutral-400">vs.</span>
                     <span className={`truncate ${!p1Won ? "font-semibold" : ""}`}>{p2?.name}</span>
@@ -89,12 +90,6 @@ export default async function Home() {
                     )}
                     <span className="font-mono text-neutral-700">{formatScore(m)}</span>
                   </div>
-                </div>
-                <div className="mt-1 flex items-center gap-2 text-xs text-neutral-500">
-                  <span>{formatDate(m.date)}</span>
-                  <span className="rounded bg-neutral-100 px-1.5 py-0.5 font-medium text-neutral-700">
-                    Sk. {m.group}
-                  </span>
                 </div>
               </li>
             );

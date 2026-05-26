@@ -85,7 +85,7 @@ function GroupTable({
               <th className="px-4 py-3 font-medium text-right">Výhry</th>
               <th className="px-4 py-3 font-medium text-right">Prohry</th>
               <th className="px-4 py-3 font-medium text-right">Sety</th>
-              <th className="px-4 py-3 font-medium text-right">Gemy</th>
+              <th className="px-4 py-3 font-medium text-right">Gamy</th>
               <th className="px-4 py-3 font-medium text-right">Body</th>
             </tr>
           </thead>

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { fetchMatches, fetchPlayers } from "@/lib/data";
-import { formatDate, formatScore } from "@/lib/format";
+import { formatScore } from "@/lib/format";
 import { GROUPS, type Group, type Match, type Player } from "@/data/types";
 import { Tabs } from "./Tabs";
 
@@ -15,8 +15,7 @@ export default async function ZapasyPage() {
       <div>
         <h1 className="text-3xl font-semibold tracking-tight">Zápasy</h1>
         <p className="mt-1 text-sm text-neutral-600">
-          {matches.length} odehraných utkání, aktuální výsledky a kompletní
-          přehled zápasů napříč všemi skupinami ligy.
+          Aktuální výsledky a kompletní přehled zápasů napříč všemi skupinami ligy.
         </p>
       </div>
 
@@ -130,7 +129,6 @@ function GroupMatches({
                       <span className="font-mono text-neutral-700">{formatScore(m)}</span>
                     </div>
                   </div>
-                  <div className="mt-1 text-xs text-neutral-500">{formatDate(m.date)}</div>
                 </li>
               );
             })}

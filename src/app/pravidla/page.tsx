@@ -32,7 +32,7 @@ export default function PravidlaPage() {
             <li>Liga se hraje systémem „každý s každým" ve skupinách.</li>
             <li>Počet hráčů ve skupině určí organizátor podle počtu přihlášených.</li>
             <li>Soutěž může být rozdělena do více výkonnostních skupin.</li>
-            <li>Po skončení základní části postupují hráči do finálového play-off, kde se hraje systémem pavouka. Nasazení určuje pořadí ve skupině. Pavouk s nasazením bude představen 13 dní před zahájením losování turnaje.</li>
+            <li>Po skončení základní části postupují hráči do finálového play-off, kde se hraje systémem pavouka. Nasazení určuje pořadí ve skupině. Pavouk s nasazením bude představen již před zahájením losování turnaje.</li>
           </ul>
         </section>
 
@@ -41,7 +41,7 @@ export default function PravidlaPage() {
           <ul className="space-y-1 text-sm text-neutral-700">
             <li>Hráči si termín zápasu domlouvají mezi sebou.</li>
             <li>Pokud se hráči nedohodnou, může organizátor určit závazný termín zápasu.</li>
-            <li>Nedohrání zápasu může být kontumováno.</li>
+            <li>Neodehraný zápas může být kontumován.</li>
           </ul>
         </section>
 
@@ -75,21 +75,21 @@ export default function PravidlaPage() {
 
         <section>
           <h2 className="mb-2 text-base font-semibold">8. Pořadí ve skupině</h2>
-          <p className="mb-1 text-sm text-neutral-700">Pořadí ve skupině určuje (v tomto pořadí):</p>
-          <ol className="list-decimal space-y-1 pl-5 text-sm text-neutral-700">
-            <li>Počet bodů</li>
-            <li>Vzájemný zápas</li>
-            <li>Poměr setů</li>
-            <li>Rozdíl gamů</li>
-          </ol>
+          <p className="mb-1 text-sm text-neutral-700">Pořadí ve skupině určuje:</p>
+          <ul className="space-y-1 text-sm text-neutral-700">
+            <li>· Počet bodů</li>
+            <li>· Vzájemný zápas</li>
+            <li>· Rozdíl setů</li>
+            <li>· Rozdíl gamů</li>
+          </ul>
         </section>
 
         <section>
-          <h2 className="mb-2 text-base font-semibold">9. Kontumace a skrče</h2>
+          <h2 className="mb-2 text-base font-semibold">9. Kontumace a skreče</h2>
           <ul className="space-y-1 text-sm text-neutral-700">
-            <li>Hráč, který bez omluvy opakovaně nekomunikuje nebo nenastoupí k zápasu, bývá ze soutěže vyřazen.</li>
+            <li>Hráč, který bez omluvy opakovaně nekomunikuje nebo nenastoupí k zápasům, může být ze soutěže vyřazen.</li>
             <li>Kontumační výsledek je stanoven 6:0 6:0.</li>
-            <li>Při skrčení během zápasu zůstanou dohrané gamy zachovány a soupeř získává vítězství.</li>
+            <li>Při skreči během zápasu zůstanou dohrané gamy zachovány a soupeř získává vítězství.</li>
           </ul>
         </section>
 
@@ -97,14 +97,14 @@ export default function PravidlaPage() {
           <h2 className="mb-2 text-base font-semibold">10. Fair play a chování hráčů</h2>
           <ul className="space-y-1 text-sm text-neutral-700">
             <li>Od všech hráčů se očekává slušné a sportovní chování.</li>
-            <li>Hrubé nesportovní chování, včetně úmyslného ničení majetku, může vést k vyloučení ze soutěže.</li>
+            <li>Hrubé nesportovní chování, vulgarity nebo ničení majetku mohou vést k vyloučení ze soutěže.</li>
           </ul>
         </section>
 
         <section>
           <h2 className="mb-2 text-base font-semibold">11. Startovné</h2>
           <ul className="space-y-1 text-sm text-neutral-700">
-            <li>Výše startovného za sezonu je 600 Kč.</li>
+            <li>Výše startovného je stanovena na 600,- Kč.</li>
             <li>Startovné musí být uhrazeno před prvním zápasem.</li>
           </ul>
         </section>
@@ -118,13 +118,14 @@ export default function PravidlaPage() {
           </ul>
         </section>
 
-        <section className="rounded-lg border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-700">
-          <p>
-            <strong>Organizátor si vyhrazuje právo pravidla upravit v průběhu soutěže.</strong> Přihlášením do soutěže hráč potvrzuje souhlas s těmito pravidly.
-          </p>
-          <p className="mt-1">
-            Hlavním cílem ligy je radost z tenisu, pravidelný pohyb a přátelská atmosféra. Přejeme vám mnoho sportovních zážitků a fair play zápasů.
-          </p>
+        <section>
+          <h2 className="mb-2 text-base font-semibold">13. Organizátor</h2>
+          <ul className="space-y-1 text-sm text-neutral-700">
+            <li>Organizátor si vyhrazuje právo pravidla upravit v průběhu soutěže.</li>
+            <li>Přihlášením do soutěže hráč potvrzuje souhlas s těmito pravidly.</li>
+            <li>Hlavním cílem ligy je radost ze hry, pravidelný pohyb a přátelská atmosféra.</li>
+          </ul>
+          <p className="mt-3 text-sm font-medium text-neutral-700">Přejeme všem hráčům mnoho sportovních zážitků a fair play zápasů.</p>
         </section>
       </div>
     </div>

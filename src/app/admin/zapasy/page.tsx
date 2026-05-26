@@ -2,6 +2,7 @@ import Link from "next/link";
 import { fetchMatches, fetchPlayers } from "@/lib/data";
 import { formatDate, formatScore } from "@/lib/format";
 import { deleteMatch } from "./actions";
+import { DeleteButton } from "@/components/DeleteButton";
 
 export const metadata = { title: "Správa zápasů – Administrace" };
 
@@ -34,7 +35,8 @@ export default async function AdminMatchesPage({
         </p>
       )}
 
-      <ul className="overflow-hidden rounded-lg border border-neutral-200 bg-white">
+      <div className="overflow-x-auto rounded-lg border border-neutral-200">
+      <ul className="min-w-[640px] bg-white">
         {matches.map((m) => {
           const p1 = playersById.get(m.player1Id);
           const p2 = playersById.get(m.player2Id);
@@ -70,20 +72,13 @@ export default async function AdminMatchesPage({
                 >
                   Upravit
                 </Link>
-                <form action={deleteMatch}>
-                  <input type="hidden" name="id" value={m.id} />
-                  <button
-                    type="submit"
-                    className="rounded-md border border-red-200 bg-white px-3 py-1 text-xs text-red-700 hover:bg-red-50"
-                  >
-                    Smazat
-                  </button>
-                </form>
+                <DeleteButton action={deleteMatch} id={m.id} confirm="Opravdu chceš smazat tento zápas?" />
               </div>
             </li>
           );
         })}
       </ul>
+      </div>
     </div>
   );
 }

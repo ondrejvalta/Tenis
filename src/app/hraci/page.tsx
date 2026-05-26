@@ -13,19 +13,21 @@ export default async function HraciPage() {
       <div>
         <h1 className="text-3xl font-semibold tracking-tight">Hráči</h1>
         <p className="mt-1 text-sm text-neutral-600">
-          Každý hráč má svůj příběh. Sledujte profily všech {players.length}{" "}
-          účastníků ligy, jejich úspěšnost, odehrané zápasy a statistiky sezóny.
+          Sledujte profily všech účastníků ligy, jejich úspěšnost, odehrané zápasy a statistiky sezóny.
         </p>
       </div>
 
-      {GROUPS.map((group) => (
-        <GroupSection
-          key={group}
-          group={group}
-          players={players}
-          matches={matches}
-        />
-      ))}
+      <div className="space-y-3">
+        {GROUPS.map((group, idx) => (
+          <GroupSection
+            key={group}
+            group={group}
+            players={players}
+            matches={matches}
+            defaultOpen={idx === 0}
+          />
+        ))}
+      </div>
     </div>
   );
 }
@@ -34,10 +36,12 @@ function GroupSection({
   group,
   players,
   matches,
+  defaultOpen,
 }: {
   group: Group;
   players: Player[];
   matches: Match[];
+  defaultOpen?: boolean;
 }) {
   const groupPlayers = players.filter((p) => p.group === group);
   const standings = computeStandingsForGroup(group, players, matches);
@@ -47,14 +51,27 @@ function GroupSection({
     .sort((a, b) => a.name.localeCompare(b.name, "cs"));
 
   return (
-    <section>
-      <h2 className="mb-3 text-lg font-semibold">
-        Skupina {group}{" "}
-        <span className="text-sm font-normal text-neutral-500">
-          ({groupPlayers.length} hráčů)
+    <details
+      open={defaultOpen}
+      className="group rounded-lg border border-neutral-200 bg-white"
+    >
+      <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-sm">
+        <span className="flex items-center gap-2">
+          <svg
+            viewBox="0 0 12 12"
+            className="h-3 w-3 text-neutral-400 transition-transform group-open:rotate-90"
+            fill="currentColor"
+            aria-hidden
+          >
+            <path d="M4 2l4 4-4 4V2z" />
+          </svg>
+          <span className="font-semibold text-neutral-700">Skupina {group}</span>
         </span>
-      </h2>
-      <ul className="grid gap-3 sm:grid-cols-2">
+        <span className="text-xs text-neutral-500">
+          {groupPlayers.length} {groupPlayers.length === 1 ? "hráč" : groupPlayers.length >= 2 && groupPlayers.length <= 4 ? "hráči" : "hráčů"}
+        </span>
+      </summary>
+      <ul className="grid gap-3 border-t border-neutral-100 p-3 sm:grid-cols-2">
         {sorted.map((p) => {
           const s = statsById.get(p.id);
           return (
@@ -81,6 +98,6 @@ function GroupSection({
           );
         })}
       </ul>
-    </section>
+    </details>
   );
 }
