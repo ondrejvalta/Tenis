@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser, isCurrentUserAdmin } from "@/lib/auth";
 import { LoginForm } from "./LoginForm";
@@ -34,6 +35,15 @@ export default async function LoginPage({
       )}
 
       <LoginForm next={next} />
+
+      <p className="text-center text-sm">
+        <Link
+          href="/prihlaseni/zapomenute-heslo"
+          className="text-neutral-600 underline-offset-2 hover:text-neutral-900 hover:underline"
+        >
+          Zapomenuté heslo?
+        </Link>
+      </p>
     </div>
   );
 }

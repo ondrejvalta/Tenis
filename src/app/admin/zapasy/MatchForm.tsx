@@ -2,8 +2,46 @@
 
 import Link from "next/link";
 import { useActionState, useMemo, useState } from "react";
+import { CalendarIcon } from "lucide-react";
 import { GROUPS, type Group, type Player, type SetScore } from "@/data/types";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type { MatchFormState } from "./actions";
+
+// Formát data v lokální časové zóně (YYYY-MM-DD) – nepoužívat toISOString (UTC posun).
+function toYmd(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+function parseYmd(value: string): Date | undefined {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!m) return undefined;
+  return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+}
+
+const dateFormatter = new Intl.DateTimeFormat("cs-CZ", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+});
 
 type Action = (
   state: MatchFormState,
@@ -41,6 +79,10 @@ export function MatchForm({
   const [forfeitPlayerId, setForfeitPlayerId] = useState<string>(
     initial?.forfeitPlayerId ?? "",
   );
+  const [date, setDate] = useState<Date | undefined>(() =>
+    initial?.date ? parseYmd(initial.date) : new Date(),
+  );
+  const [dateOpen, setDateOpen] = useState(false);
   const playersInGroup = useMemo(
     () =>
       players
@@ -67,32 +109,54 @@ export function MatchForm({
           <label className="mb-1 block text-sm font-medium text-neutral-700">
             Datum
           </label>
-          <input
-            name="date"
-            type="date"
-            required
-            defaultValue={
-              initial?.date ?? new Date().toISOString().slice(0, 10)
-            }
-            className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
-          />
+          <input type="hidden" name="date" value={date ? toYmd(date) : ""} />
+          <Popover open={dateOpen} onOpenChange={setDateOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                type="button"
+                variant="outline"
+                className={cn(
+                  "w-full justify-start font-normal",
+                  !date && "text-muted-foreground",
+                )}
+              >
+                <CalendarIcon className="size-4 opacity-60" />
+                {date ? dateFormatter.format(date) : "Vyber datum"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={date}
+                onSelect={(d) => {
+                  setDate(d);
+                  setDateOpen(false);
+                }}
+                autoFocus
+              />
+            </PopoverContent>
+          </Popover>
         </div>
         <div>
           <label className="mb-1 block text-sm font-medium text-neutral-700">
             Skupina
           </label>
-          <select
+          <Select
             name="group"
             value={group}
-            onChange={(e) => setGroup(e.target.value as Group)}
-            className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
+            onValueChange={(v) => setGroup(v as Group)}
           >
-            {GROUPS.map((g) => (
-              <option key={g} value={g}>
-                {g}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {GROUPS.map((g) => (
+                <SelectItem key={g} value={g}>
+                  {g}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
@@ -101,49 +165,61 @@ export function MatchForm({
           <label className="mb-1 block text-sm font-medium text-neutral-700">
             Hráč 1
           </label>
-          <select
+          <Select
             name="player1_id"
-            required
             value={player1Id}
-            onChange={(e) => {
-              setPlayer1Id(e.target.value);
-              if (forfeitPlayerId && forfeitPlayerId !== e.target.value && forfeitPlayerId !== player2Id) {
+            onValueChange={(v) => {
+              setPlayer1Id(v);
+              if (
+                forfeitPlayerId &&
+                forfeitPlayerId !== v &&
+                forfeitPlayerId !== player2Id
+              ) {
                 setForfeitPlayerId("");
               }
             }}
-            className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
           >
-            <option value="">— vyber —</option>
-            {playersInGroup.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="— vyber —" />
+            </SelectTrigger>
+            <SelectContent>
+              {playersInGroup.map((p) => (
+                <SelectItem key={p.id} value={p.id}>
+                  {p.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <div>
           <label className="mb-1 block text-sm font-medium text-neutral-700">
             Hráč 2
           </label>
-          <select
+          <Select
             name="player2_id"
-            required
             value={player2Id}
-            onChange={(e) => {
-              setPlayer2Id(e.target.value);
-              if (forfeitPlayerId && forfeitPlayerId !== e.target.value && forfeitPlayerId !== player1Id) {
+            onValueChange={(v) => {
+              setPlayer2Id(v);
+              if (
+                forfeitPlayerId &&
+                forfeitPlayerId !== v &&
+                forfeitPlayerId !== player1Id
+              ) {
                 setForfeitPlayerId("");
               }
             }}
-            className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
           >
-            <option value="">— vyber —</option>
-            {playersInGroup.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="— vyber —" />
+            </SelectTrigger>
+            <SelectContent>
+              {playersInGroup.map((p) => (
+                <SelectItem key={p.id} value={p.id}>
+                  {p.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
@@ -165,42 +241,38 @@ export function MatchForm({
               <div className="col-span-1 text-sm text-neutral-500">{i}.</div>
               <div className="col-span-2">
                 <label className="block text-xs text-neutral-500">P1 gemy</label>
-                <input
+                <Input
                   name={`set${i}_p1`}
                   type="number"
                   min={0}
                   defaultValue={s?.p1 ?? 0}
-                  className="w-full rounded-md border border-neutral-300 px-2 py-1.5 text-sm"
                 />
               </div>
               <div className="col-span-2">
                 <label className="block text-xs text-neutral-500">P2 gemy</label>
-                <input
+                <Input
                   name={`set${i}_p2`}
                   type="number"
                   min={0}
                   defaultValue={s?.p2 ?? 0}
-                  className="w-full rounded-md border border-neutral-300 px-2 py-1.5 text-sm"
                 />
               </div>
               <div className="col-span-2">
                 <label className="block text-xs text-neutral-500">P1 TB</label>
-                <input
+                <Input
                   name={`set${i}_tb_p1`}
                   type="number"
                   min={0}
                   defaultValue={s?.tiebreak?.p1 ?? ""}
-                  className="w-full rounded-md border border-neutral-300 px-2 py-1.5 text-sm"
                 />
               </div>
               <div className="col-span-2">
                 <label className="block text-xs text-neutral-500">P2 TB</label>
-                <input
+                <Input
                   name={`set${i}_tb_p2`}
                   type="number"
                   min={0}
                   defaultValue={s?.tiebreak?.p2 ?? ""}
-                  className="w-full rounded-md border border-neutral-300 px-2 py-1.5 text-sm"
                 />
               </div>
             </div>
@@ -215,22 +287,20 @@ export function MatchForm({
               </div>
               <div className="col-span-3">
                 <label className="block text-xs text-neutral-500">P1 body</label>
-                <input
+                <Input
                   name="set3_p1"
                   type="number"
                   min={0}
                   defaultValue={s?.p1 ?? ""}
-                  className="w-full rounded-md border border-neutral-300 px-2 py-1.5 text-sm"
                 />
               </div>
               <div className="col-span-3">
                 <label className="block text-xs text-neutral-500">P2 body</label>
-                <input
+                <Input
                   name="set3_p2"
                   type="number"
                   min={0}
                   defaultValue={s?.p2 ?? ""}
-                  className="w-full rounded-md border border-neutral-300 px-2 py-1.5 text-sm"
                 />
               </div>
             </div>
@@ -240,13 +310,13 @@ export function MatchForm({
 
       <div className="space-y-2">
         <label className="flex items-center gap-2 text-sm">
-          <input
+          <Checkbox
             name="forfeit"
-            type="checkbox"
             checked={forfeit}
-            onChange={(e) => {
-              setForfeit(e.target.checked);
-              if (!e.target.checked) setForfeitPlayerId("");
+            onCheckedChange={(checked) => {
+              const next = checked === true;
+              setForfeit(next);
+              if (!next) setForfeitPlayerId("");
             }}
           />
           Kontumace (vybraný hráč dostane 0 bodů místo 1)
@@ -256,25 +326,33 @@ export function MatchForm({
             <label className="mb-1 block text-sm font-medium text-neutral-700">
               Kontumovaný hráč
             </label>
-            <select
+            <Select
               name="forfeit_player_id"
-              required={forfeit}
               value={forfeitPlayerId}
-              onChange={(e) => setForfeitPlayerId(e.target.value)}
-              className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
+              onValueChange={setForfeitPlayerId}
             >
-              <option value="">— vyber —</option>
-              {player1Id && (
-                <option value={player1Id}>
-                  Hráč 1{playerNameById.get(player1Id) ? ` — ${playerNameById.get(player1Id)}` : ""}
-                </option>
-              )}
-              {player2Id && (
-                <option value={player2Id}>
-                  Hráč 2{playerNameById.get(player2Id) ? ` — ${playerNameById.get(player2Id)}` : ""}
-                </option>
-              )}
-            </select>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="— vyber —" />
+              </SelectTrigger>
+              <SelectContent>
+                {player1Id && (
+                  <SelectItem value={player1Id}>
+                    Hráč 1
+                    {playerNameById.get(player1Id)
+                      ? ` — ${playerNameById.get(player1Id)}`
+                      : ""}
+                  </SelectItem>
+                )}
+                {player2Id && (
+                  <SelectItem value={player2Id}>
+                    Hráč 2
+                    {playerNameById.get(player2Id)
+                      ? ` — ${playerNameById.get(player2Id)}`
+                      : ""}
+                  </SelectItem>
+                )}
+              </SelectContent>
+            </Select>
           </div>
         )}
       </div>
@@ -286,19 +364,12 @@ export function MatchForm({
       )}
 
       <div className="flex gap-2">
-        <button
-          type="submit"
-          disabled={pending}
-          className="rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 disabled:opacity-60"
-        >
+        <Button type="submit" disabled={pending}>
           {pending ? "Ukládám…" : submitLabel}
-        </button>
-        <Link
-          href="/admin/zapasy"
-          className="rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm hover:bg-neutral-50"
-        >
-          Zrušit
-        </Link>
+        </Button>
+        <Button asChild variant="outline">
+          <Link href="/admin/zapasy">Zrušit</Link>
+        </Button>
       </div>
     </form>
   );
