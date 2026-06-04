@@ -3,39 +3,46 @@
 import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { loginAction, type LoginState } from "./actions";
+import { updatePasswordAction, type NewPasswordState } from "../actions";
 
-export function LoginForm({ next }: { next: string }) {
-  const [state, action, pending] = useActionState<LoginState, FormData>(
-    loginAction,
+export function NewPasswordForm() {
+  const [state, action, pending] = useActionState<NewPasswordState, FormData>(
+    updatePasswordAction,
     undefined,
   );
 
   return (
     <form action={action} className="space-y-4">
-      <input type="hidden" name="next" value={next} />
-      <div>
-        <label
-          htmlFor="email"
-          className="mb-1 block text-sm font-medium text-neutral-700"
-        >
-          Email
-        </label>
-        <Input id="email" name="email" type="email" required autoComplete="email" />
-      </div>
       <div>
         <label
           htmlFor="password"
           className="mb-1 block text-sm font-medium text-neutral-700"
         >
-          Heslo
+          Nové heslo
         </label>
         <Input
           id="password"
           name="password"
           type="password"
           required
-          autoComplete="current-password"
+          minLength={8}
+          autoComplete="new-password"
+        />
+      </div>
+      <div>
+        <label
+          htmlFor="confirm"
+          className="mb-1 block text-sm font-medium text-neutral-700"
+        >
+          Heslo znovu
+        </label>
+        <Input
+          id="confirm"
+          name="confirm"
+          type="password"
+          required
+          minLength={8}
+          autoComplete="new-password"
         />
       </div>
       {state?.error && (
@@ -44,7 +51,7 @@ export function LoginForm({ next }: { next: string }) {
         </p>
       )}
       <Button type="submit" disabled={pending} className="w-full">
-        {pending ? "Přihlašuji…" : "Přihlásit se"}
+        {pending ? "Ukládám…" : "Nastavit nové heslo"}
       </Button>
     </form>
   );
