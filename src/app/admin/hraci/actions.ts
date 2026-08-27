@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/auth";
 import { slugify } from "@/lib/slug";
 import type { Database } from "@/lib/supabase/database.types";
+import { CATEGORIES, type Category } from "@/data/types";
 
 type Group = Database["public"]["Enums"]["league_group"];
 const VALID_GROUPS: Group[] = ["A", "B", "C", "D"];
@@ -34,13 +35,18 @@ export async function createPlayer(
   await requireAdmin();
   const name = String(formData.get("name") ?? "").trim();
   const group = String(formData.get("group") ?? "") as Group;
+  const category = String(formData.get("category") ?? "") as Category;
   if (!name) return { error: "Jméno je povinné." };
   if (!VALID_GROUPS.includes(group))
     return { error: "Neplatná skupina." };
+  if (!CATEGORIES.includes(category))
+    return { error: "Neplatná kategorie." };
 
   const id = await pickFreeId(slugify(name));
   const supabase = await createClient();
-  const { error } = await supabase.from("players").insert({ id, name, group });
+  const { error } = await supabase
+    .from("players")
+    .insert({ id, name, group, category });
   if (error) return { error: error.message };
 
   revalidatePath("/admin/hraci");
@@ -58,14 +64,17 @@ export async function updatePlayer(
   await requireAdmin();
   const name = String(formData.get("name") ?? "").trim();
   const group = String(formData.get("group") ?? "") as Group;
+  const category = String(formData.get("category") ?? "") as Category;
   if (!name) return { error: "Jméno je povinné." };
   if (!VALID_GROUPS.includes(group))
     return { error: "Neplatná skupina." };
+  if (!CATEGORIES.includes(category))
+    return { error: "Neplatná kategorie." };
 
   const supabase = await createClient();
   const { error } = await supabase
     .from("players")
-    .update({ name, group })
+    .update({ name, group, category })
     .eq("id", id);
   if (error) return { error: error.message };
 

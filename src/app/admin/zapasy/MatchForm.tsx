@@ -3,7 +3,15 @@
 import Link from "next/link";
 import { useActionState, useMemo, useState } from "react";
 import { CalendarIcon } from "lucide-react";
-import { GROUPS, type Group, type Player, type SetScore } from "@/data/types";
+import {
+  CATEGORIES,
+  CATEGORY_LABELS,
+  GROUPS,
+  type Category,
+  type Group,
+  type Player,
+  type SetScore,
+} from "@/data/types";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -59,6 +67,7 @@ export function MatchForm({
   initial?: {
     date: string;
     group: Group;
+    category: Category;
     player1Id: string;
     player2Id: string;
     forfeit: boolean;
@@ -72,6 +81,9 @@ export function MatchForm({
     undefined,
   );
 
+  const [category, setCategory] = useState<Category>(
+    initial?.category ?? "dospeli",
+  );
   const [group, setGroup] = useState<Group>(initial?.group ?? "A");
   const [player1Id, setPlayer1Id] = useState<string>(initial?.player1Id ?? "");
   const [player2Id, setPlayer2Id] = useState<string>(initial?.player2Id ?? "");
@@ -83,12 +95,20 @@ export function MatchForm({
     initial?.date ? parseYmd(initial.date) : new Date(),
   );
   const [dateOpen, setDateOpen] = useState(false);
+
+  // Vyčistí výběr hráčů (např. po změně kategorie / skupiny).
+  const resetPlayers = () => {
+    setPlayer1Id("");
+    setPlayer2Id("");
+    setForfeitPlayerId("");
+  };
+
   const playersInGroup = useMemo(
     () =>
       players
-        .filter((p) => p.group === group)
+        .filter((p) => p.category === category && p.group === group)
         .sort((a, b) => a.name.localeCompare(b.name, "cs")),
-    [players, group],
+    [players, category, group],
   );
   const playerNameById = useMemo(() => {
     const m = new Map<string, string>();
@@ -104,7 +124,7 @@ export function MatchForm({
 
   return (
     <form action={formAction} className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div>
           <label className="mb-1 block text-sm font-medium text-neutral-700">
             Datum
@@ -139,12 +159,39 @@ export function MatchForm({
         </div>
         <div>
           <label className="mb-1 block text-sm font-medium text-neutral-700">
+            Kategorie
+          </label>
+          <Select
+            name="category"
+            value={category}
+            onValueChange={(v) => {
+              setCategory(v as Category);
+              resetPlayers();
+            }}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {CATEGORIES.map((c) => (
+                <SelectItem key={c} value={c}>
+                  {CATEGORY_LABELS[c]}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <label className="mb-1 block text-sm font-medium text-neutral-700">
             Skupina
           </label>
           <Select
             name="group"
             value={group}
-            onValueChange={(v) => setGroup(v as Group)}
+            onValueChange={(v) => {
+              setGroup(v as Group);
+              resetPlayers();
+            }}
           >
             <SelectTrigger className="w-full">
               <SelectValue />

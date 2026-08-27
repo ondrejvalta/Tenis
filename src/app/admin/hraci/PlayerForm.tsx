@@ -2,7 +2,13 @@
 
 import Link from "next/link";
 import { useActionState } from "react";
-import { GROUPS, type Group } from "@/data/types";
+import {
+  CATEGORIES,
+  CATEGORY_LABELS,
+  GROUPS,
+  type Category,
+  type Group,
+} from "@/data/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -25,7 +31,7 @@ export function PlayerForm({
   submitLabel,
 }: {
   action: Action;
-  initial?: { name: string; group: Group };
+  initial?: { name: string; group: Group; category: Category };
   submitLabel: string;
 }) {
   const [state, formAction, pending] = useActionState<PlayerFormState, FormData>(
@@ -40,6 +46,23 @@ export function PlayerForm({
           Jméno
         </label>
         <Input name="name" required defaultValue={initial?.name ?? ""} />
+      </div>
+      <div>
+        <label className="mb-1 block text-sm font-medium text-neutral-700">
+          Kategorie
+        </label>
+        <Select name="category" defaultValue={initial?.category ?? "dospeli"}>
+          <SelectTrigger className="w-full">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {CATEGORIES.map((c) => (
+              <SelectItem key={c} value={c}>
+                {CATEGORY_LABELS[c]}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
       <div>
         <label className="mb-1 block text-sm font-medium text-neutral-700">

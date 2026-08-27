@@ -26,6 +26,7 @@ export default async function EditMatchPage({
         initial={{
           date: match.date,
           group: match.group,
+          category: match.category,
           player1Id: match.player1Id,
           player2Id: match.player2Id,
           forfeit: !!match.forfeit,

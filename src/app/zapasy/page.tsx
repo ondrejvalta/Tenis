@@ -1,23 +1,45 @@
 import Link from "next/link";
 import { fetchMatches, fetchPlayers } from "@/lib/data";
+import { CollapsibleSection } from "@/components/CollapsibleSection";
+import { CategorySwitch } from "@/components/CategorySwitch";
+import { parseCategory } from "@/lib/category";
 import { formatScore } from "@/lib/format";
-import { GROUPS, type Group, type Match, type Player } from "@/data/types";
+import {
+  CATEGORY_LABELS,
+  GROUPS,
+  type Category,
+  type Group,
+  type Match,
+  type Player,
+} from "@/data/types";
 import { Tabs } from "./Tabs";
 
 export const metadata = { title: "Zápasy | Tenisová liga Dobříš" };
 
-export default async function ZapasyPage() {
-  const [matches, players] = await Promise.all([fetchMatches(), fetchPlayers()]);
+export default async function ZapasyPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ kategorie?: string }>;
+}) {
+  const category = parseCategory((await searchParams).kategorie);
+  const [matches, players] = await Promise.all([
+    fetchMatches(category),
+    fetchPlayers(category),
+  ]);
   const playersById = new Map(players.map((p) => [p.id, p]));
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-semibold tracking-tight">Zápasy</h1>
+        <h1 className="text-3xl font-semibold tracking-tight">
+          Zápasy – {CATEGORY_LABELS[category]}
+        </h1>
         <p className="mt-1 text-sm text-neutral-600">
           Aktuální výsledky a kompletní přehled zápasů napříč všemi skupinami ligy.
         </p>
       </div>
+
+      <CategorySwitch basePath="/zapasy" active={category} />
 
       <Tabs
         tabs={GROUPS.map((g) => ({
@@ -29,6 +51,7 @@ export default async function ZapasyPage() {
           <GroupMatches
             key={g}
             group={g}
+            category={category}
             matches={matches}
             playersById={playersById}
           />
@@ -40,10 +63,12 @@ export default async function ZapasyPage() {
 
 function GroupMatches({
   group,
+  category,
   matches,
   playersById,
 }: {
   group: Group;
+  category: Category;
   matches: Match[];
   playersById: Map<string, Player>;
 }) {
@@ -71,29 +96,14 @@ function GroupMatches({
   return (
     <div className="space-y-3">
       {entries.map(([key, monthMatches], idx) => (
-        <details
+        <CollapsibleSection
           key={key}
-          open={idx === 0}
-          className="group rounded-lg border border-neutral-200 bg-white"
+          id={`zapasy-${category}-${group}-${key}`}
+          defaultOpen={idx === 0}
+          title={monthLabel(key)}
+          titleClassName="capitalize"
+          meta={`${monthMatches.length} ${matchCountLabel(monthMatches.length)}`}
         >
-          <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-sm">
-            <span className="flex items-center gap-2">
-              <svg
-                viewBox="0 0 12 12"
-                className="h-3 w-3 text-neutral-400 transition-transform group-open:rotate-90"
-                fill="currentColor"
-                aria-hidden
-              >
-                <path d="M4 2l4 4-4 4V2z" />
-              </svg>
-              <span className="font-semibold capitalize text-neutral-700">
-                {monthLabel(key)}
-              </span>
-            </span>
-            <span className="text-xs text-neutral-500">
-              {monthMatches.length} {matchCountLabel(monthMatches.length)}
-            </span>
-          </summary>
           <ul className="space-y-2 border-t border-neutral-100 p-3">
             {monthMatches.map((m) => {
               const p1 = playersById.get(m.player1Id);
@@ -133,7 +143,7 @@ function GroupMatches({
               );
             })}
           </ul>
-        </details>
+        </CollapsibleSection>
       ))}
     </div>
   );

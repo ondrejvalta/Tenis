@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { fetchMatches, fetchPlayers } from "@/lib/data";
 import { formatDate, formatScore } from "@/lib/format";
+import { CATEGORY_LABELS } from "@/data/types";
 import { deleteMatch } from "./actions";
 import { DeleteButton } from "@/components/DeleteButton";
 
@@ -49,6 +50,9 @@ export default async function AdminMatchesPage({
               <div className="flex items-center gap-3">
                 <span className="w-24 text-neutral-500">
                   {formatDate(m.date)}
+                </span>
+                <span className="rounded bg-lime-100 px-1.5 py-0.5 text-xs font-medium text-lime-800">
+                  {CATEGORY_LABELS[m.category]}
                 </span>
                 <span className="rounded bg-neutral-100 px-1.5 py-0.5 text-xs font-medium text-neutral-700">
                   Sk. {m.group}

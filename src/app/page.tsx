@@ -5,7 +5,12 @@ import { formatScore } from "@/lib/format";
 import { GROUPS, type Group, type Match, type Player } from "@/data/types";
 
 export default async function Home() {
-  const [players, matches] = await Promise.all([fetchPlayers(), fetchMatches()]);
+  // Přehled na titulní stránce ukazuje dospělou soutěž; děti mají vlastní
+  // sekce dostupné přes menu (Žebříček / Zápasy / Hráči → Děti).
+  const [players, matches] = await Promise.all([
+    fetchPlayers("dospeli"),
+    fetchMatches("dospeli"),
+  ]);
   const playersById = new Map(players.map((p) => [p.id, p]));
   const recentMatches = matches
     .slice()

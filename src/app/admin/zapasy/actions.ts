@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/auth";
 import type { Database } from "@/lib/supabase/database.types";
+import { CATEGORIES, type Category } from "@/data/types";
 
 type Group = Database["public"]["Enums"]["league_group"];
 const VALID_GROUPS: Group[] = ["A", "B", "C", "D"];
@@ -23,6 +24,7 @@ type ParsedSet = {
 type Parsed = {
   date: string;
   group: Group;
+  category: Category;
   player1_id: string;
   player2_id: string;
   forfeit: boolean;
@@ -47,6 +49,7 @@ async function parseForm(
 ): Promise<Parsed | { error: string }> {
   const date = String(formData.get("date") ?? "").trim();
   const group = String(formData.get("group") ?? "") as Group;
+  const category = String(formData.get("category") ?? "") as Category;
   const player1_id = String(formData.get("player1_id") ?? "");
   const player2_id = String(formData.get("player2_id") ?? "");
   const forfeit = formData.get("forfeit") === "on";
@@ -54,6 +57,7 @@ async function parseForm(
 
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return { error: "Datum je povinné." };
   if (!VALID_GROUPS.includes(group)) return { error: "Neplatná skupina." };
+  if (!CATEGORIES.includes(category)) return { error: "Neplatná kategorie." };
   if (!player1_id || !player2_id) return { error: "Vyber oba hráče." };
   if (player1_id === player2_id) return { error: "Hráči musí být různí." };
   if (forfeit) {
@@ -66,10 +70,12 @@ async function parseForm(
   const supabase = await createClient();
   const { data: pls } = await supabase
     .from("players")
-    .select("id, group")
+    .select("id, group, category")
     .in("id", [player1_id, player2_id]);
   if (!pls || pls.length !== 2)
     return { error: "Jeden z hráčů nebyl nalezen." };
+  if (pls.some((p) => p.category !== category))
+    return { error: "Oba hráči musí být ve vybrané kategorii." };
   if (pls.some((p) => p.group !== group))
     return { error: "Oba hráči musí být ve vybrané skupině." };
 
@@ -119,6 +125,7 @@ async function parseForm(
   return {
     date,
     group,
+    category,
     player1_id,
     player2_id,
     forfeit,
@@ -151,6 +158,7 @@ export async function createMatch(
     id,
     date: parsed.date,
     group: parsed.group,
+    category: parsed.category,
     player1_id: parsed.player1_id,
     player2_id: parsed.player2_id,
     winner_id: parsed.winner_id,
@@ -186,6 +194,7 @@ export async function updateMatch(
     .update({
       date: parsed.date,
       group: parsed.group,
+      category: parsed.category,
       player1_id: parsed.player1_id,
       player2_id: parsed.player2_id,
       winner_id: parsed.winner_id,

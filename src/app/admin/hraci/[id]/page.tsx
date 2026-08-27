@@ -27,6 +27,7 @@ export default async function EditPlayerPage({
         initial={{
           name: player.name,
           group: player.group,
+          category: player.category,
         }}
         submitLabel="Uložit změny"
       />

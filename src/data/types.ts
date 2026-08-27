@@ -2,11 +2,24 @@ export type Group = "A" | "B" | "C" | "D";
 
 export const GROUPS: Group[] = ["A", "B", "C", "D"];
 
+// Kategorie soutěže – dospělí (výchozí) a děti.
+export type Category = "dospeli" | "deti";
+
+export const CATEGORIES: Category[] = ["dospeli", "deti"];
+
+export const CATEGORY_LABELS: Record<Category, string> = {
+  dospeli: "Dospělí",
+  deti: "Děti",
+};
+
+export const DEFAULT_CATEGORY: Category = "dospeli";
+
 export type Player = {
   id: string;
   name: string;
   joinedAt: string;
   group: Group;
+  category: Category;
 };
 
 export type SetScore = {
@@ -22,6 +35,7 @@ export type Match = {
   id: string;
   date: string;
   group: Group;
+  category: Category;
   player1Id: string;
   player2Id: string;
   sets: SetScore[];

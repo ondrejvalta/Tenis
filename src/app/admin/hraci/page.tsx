@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { fetchPlayers } from "@/lib/data";
-import { GROUPS } from "@/data/types";
+import { CATEGORIES, CATEGORY_LABELS, GROUPS } from "@/data/types";
 import { deletePlayer } from "./actions";
 import { DeleteButton } from "@/components/DeleteButton";
 
@@ -42,38 +42,52 @@ export default async function AdminPlayersPage({
         </p>
       )}
 
-      {GROUPS.map((group) => {
-        const groupPlayers = sorted.filter((p) => p.group === group);
+      {CATEGORIES.map((category) => {
+        const categoryPlayers = sorted.filter((p) => p.category === category);
         return (
-          <section key={group}>
-            <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-neutral-500">
-              Skupina {group} · {groupPlayers.length}
+          <div key={category} className="space-y-4">
+            <h2 className="text-lg font-semibold tracking-tight">
+              {CATEGORY_LABELS[category]} · {categoryPlayers.length}
             </h2>
-            <ul className="overflow-hidden rounded-lg border border-neutral-200 bg-white">
-              {groupPlayers.map((p) => (
-                <li
-                  key={p.id}
-                  className="flex items-center justify-between border-b border-neutral-100 px-4 py-2.5 text-sm last:border-b-0"
-                >
-                  <div>
-                    <div className="font-medium">{p.name}</div>
-                    <div className="text-xs text-neutral-500">
-                      {p.id}
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Link
-                      href={`/admin/hraci/${p.id}`}
-                      className="rounded-md border border-neutral-300 bg-white px-3 py-1 text-xs hover:bg-neutral-50"
-                    >
-                      Upravit
-                    </Link>
-                    <DeleteButton action={deletePlayer} id={p.id} confirm="Opravdu chceš smazat tohoto hráče?" />
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </section>
+            {GROUPS.map((group) => {
+              const groupPlayers = categoryPlayers.filter(
+                (p) => p.group === group,
+              );
+              if (groupPlayers.length === 0) return null;
+              return (
+                <section key={group}>
+                  <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-neutral-500">
+                    Skupina {group} · {groupPlayers.length}
+                  </h3>
+                  <ul className="overflow-hidden rounded-lg border border-neutral-200 bg-white">
+                    {groupPlayers.map((p) => (
+                      <li
+                        key={p.id}
+                        className="flex items-center justify-between border-b border-neutral-100 px-4 py-2.5 text-sm last:border-b-0"
+                      >
+                        <div>
+                          <div className="font-medium">{p.name}</div>
+                          <div className="text-xs text-neutral-500">{p.id}</div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Link
+                            href={`/admin/hraci/${p.id}`}
+                            className="rounded-md border border-neutral-300 bg-white px-3 py-1 text-xs hover:bg-neutral-50"
+                          >
+                            Upravit
+                          </Link>
+                          <DeleteButton action={deletePlayer} id={p.id} confirm="Opravdu chceš smazat tohoto hráče?" />
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              );
+            })}
+            {categoryPlayers.length === 0 && (
+              <p className="text-sm text-neutral-500">Žádní hráči.</p>
+            )}
+          </div>
         );
       })}
     </div>
