@@ -2,7 +2,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { fetchMatches, fetchPlayers } from "@/lib/data";
 import { computeStandingsForGroup } from "@/data/standings";
+import { CATEGORY_LABELS } from "@/data/types";
 import { formatScore } from "@/lib/format";
+import { BackButton } from "@/components/BackButton";
 
 export default async function HracDetail({
   params,
@@ -10,9 +12,16 @@ export default async function HracDetail({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [players, matches] = await Promise.all([fetchPlayers(), fetchMatches()]);
-  const player = players.find((p) => p.id === id);
+  const [allPlayers, allMatches] = await Promise.all([
+    fetchPlayers(),
+    fetchMatches(),
+  ]);
+  const player = allPlayers.find((p) => p.id === id);
   if (!player) notFound();
+
+  // Žebříček i zápasy počítáme jen v rámci kategorie hráče (dospělí / děti).
+  const players = allPlayers.filter((p) => p.category === player.category);
+  const matches = allMatches.filter((m) => m.category === player.category);
 
   const playersById = new Map(players.map((p) => [p.id, p]));
   const playerMatches = matches
@@ -26,12 +35,10 @@ export default async function HracDetail({
   return (
     <div className="space-y-6">
       <div>
-        <Link href="/hraci" className="text-sm text-neutral-500 hover:underline">
-          ← Zpět na hráče
-        </Link>
+        <BackButton />
         <h1 className="mt-2 text-3xl font-semibold tracking-tight">{player.name}</h1>
         <p className="mt-1 text-sm text-neutral-600">
-          Skupina {player.group}
+          {CATEGORY_LABELS[player.category]} · Skupina {player.group}
         </p>
       </div>
 

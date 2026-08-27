@@ -30,7 +30,9 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-neutral-50 text-neutral-900">
         <Nav />
-        <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8">{children}</main>
+        <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8">
+          {children}
+        </main>
         <footer className="border-t border-neutral-200 bg-white">
           <div className="mx-auto max-w-5xl px-4 py-4 text-sm text-neutral-500">
             © {new Date().getFullYear()} Tenisová liga Dobříš

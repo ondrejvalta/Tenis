@@ -4,12 +4,22 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/auth";
+import { categoryHref } from "@/lib/category";
 import type { Database } from "@/lib/supabase/database.types";
+import { CATEGORIES, DEFAULT_CATEGORY, type Category } from "@/data/types";
 
 type Group = Database["public"]["Enums"]["league_group"];
 const VALID_GROUPS: Group[] = ["A", "B", "C", "D"];
 
 export type MatchFormState = { error?: string } | undefined;
+
+// Cesta na seznam zápasů pro danou kategorii, volitelně s chybovou hláškou.
+function matchesListUrl(category: Category, error?: string): string {
+  const base = categoryHref("/admin/zapasy", category);
+  if (!error) return base;
+  const sep = base.includes("?") ? "&" : "?";
+  return `${base}${sep}error=${encodeURIComponent(error)}`;
+}
 
 type ParsedSet = {
   set_number: number;
@@ -23,6 +33,7 @@ type ParsedSet = {
 type Parsed = {
   date: string;
   group: Group;
+  category: Category;
   player1_id: string;
   player2_id: string;
   forfeit: boolean;
@@ -47,6 +58,7 @@ async function parseForm(
 ): Promise<Parsed | { error: string }> {
   const date = String(formData.get("date") ?? "").trim();
   const group = String(formData.get("group") ?? "") as Group;
+  const category = String(formData.get("category") ?? "") as Category;
   const player1_id = String(formData.get("player1_id") ?? "");
   const player2_id = String(formData.get("player2_id") ?? "");
   const forfeit = formData.get("forfeit") === "on";
@@ -54,6 +66,7 @@ async function parseForm(
 
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return { error: "Datum je povinné." };
   if (!VALID_GROUPS.includes(group)) return { error: "Neplatná skupina." };
+  if (!CATEGORIES.includes(category)) return { error: "Neplatná kategorie." };
   if (!player1_id || !player2_id) return { error: "Vyber oba hráče." };
   if (player1_id === player2_id) return { error: "Hráči musí být různí." };
   if (forfeit) {
@@ -66,10 +79,12 @@ async function parseForm(
   const supabase = await createClient();
   const { data: pls } = await supabase
     .from("players")
-    .select("id, group")
+    .select("id, group, category")
     .in("id", [player1_id, player2_id]);
   if (!pls || pls.length !== 2)
     return { error: "Jeden z hráčů nebyl nalezen." };
+  if (pls.some((p) => p.category !== category))
+    return { error: "Oba hráči musí být ve vybrané kategorii." };
   if (pls.some((p) => p.group !== group))
     return { error: "Oba hráči musí být ve vybrané skupině." };
 
@@ -119,6 +134,7 @@ async function parseForm(
   return {
     date,
     group,
+    category,
     player1_id,
     player2_id,
     forfeit,
@@ -151,6 +167,7 @@ export async function createMatch(
     id,
     date: parsed.date,
     group: parsed.group,
+    category: parsed.category,
     player1_id: parsed.player1_id,
     player2_id: parsed.player2_id,
     winner_id: parsed.winner_id,
@@ -167,7 +184,7 @@ export async function createMatch(
   }
 
   revalidateAll();
-  redirect("/admin/zapasy");
+  redirect(matchesListUrl(parsed.category));
 }
 
 export async function updateMatch(
@@ -186,6 +203,7 @@ export async function updateMatch(
     .update({
       date: parsed.date,
       group: parsed.group,
+      category: parsed.category,
       player1_id: parsed.player1_id,
       player2_id: parsed.player2_id,
       winner_id: parsed.winner_id,
@@ -201,7 +219,7 @@ export async function updateMatch(
   if (setsErr) return { error: setsErr.message };
 
   revalidateAll(id);
-  redirect("/admin/zapasy");
+  redirect(matchesListUrl(parsed.category));
 }
 
 export async function deleteMatch(formData: FormData) {
@@ -210,10 +228,18 @@ export async function deleteMatch(formData: FormData) {
   if (!id) return;
 
   const supabase = await createClient();
+  // Kategorii zápasu zjistíme před smazáním kvůli návratu na správný seznam.
+  const { data: existing } = await supabase
+    .from("matches")
+    .select("category")
+    .eq("id", id)
+    .maybeSingle();
+  const category: Category = existing?.category ?? DEFAULT_CATEGORY;
+
   await supabase.from("match_sets").delete().eq("match_id", id);
   const { error } = await supabase.from("matches").delete().eq("id", id);
-  if (error) redirect(`/admin/zapasy?error=${encodeURIComponent(error.message)}`);
+  if (error) redirect(matchesListUrl(category, error.message));
 
   revalidateAll();
-  redirect("/admin/zapasy");
+  redirect(matchesListUrl(category));
 }

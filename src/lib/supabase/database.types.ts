@@ -69,6 +69,7 @@ export type Database = {
       }
       matches: {
         Row: {
+          category: Database["public"]["Enums"]["player_category"]
           date: string
           forfeit: boolean
           group: Database["public"]["Enums"]["league_group"]
@@ -78,6 +79,7 @@ export type Database = {
           winner_id: string
         }
         Insert: {
+          category?: Database["public"]["Enums"]["player_category"]
           date: string
           forfeit?: boolean
           group: Database["public"]["Enums"]["league_group"]
@@ -87,6 +89,7 @@ export type Database = {
           winner_id: string
         }
         Update: {
+          category?: Database["public"]["Enums"]["player_category"]
           date?: string
           forfeit?: boolean
           group?: Database["public"]["Enums"]["league_group"]
@@ -121,18 +124,21 @@ export type Database = {
       }
       players: {
         Row: {
+          category: Database["public"]["Enums"]["player_category"]
           group: Database["public"]["Enums"]["league_group"]
           id: string
           joined_at: string
           name: string
         }
         Insert: {
+          category?: Database["public"]["Enums"]["player_category"]
           group?: Database["public"]["Enums"]["league_group"]
           id: string
           joined_at?: string
           name: string
         }
         Update: {
+          category?: Database["public"]["Enums"]["player_category"]
           group?: Database["public"]["Enums"]["league_group"]
           id?: string
           joined_at?: string
@@ -149,6 +155,7 @@ export type Database = {
     }
     Enums: {
       league_group: "A" | "B" | "C" | "D"
+      player_category: "dospeli" | "deti"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -277,6 +284,7 @@ export const Constants = {
   public: {
     Enums: {
       league_group: ["A", "B", "C", "D"],
+      player_category: ["dospeli", "deti"],
     },
   },
 } as const

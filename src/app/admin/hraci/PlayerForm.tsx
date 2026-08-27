@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useActionState } from "react";
-import { GROUPS, type Group } from "@/data/types";
+import { CATEGORY_LABELS, GROUPS, type Category, type Group } from "@/data/types";
+import { categoryHref } from "@/lib/category";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -21,10 +22,13 @@ type Action = (
 
 export function PlayerForm({
   action,
+  category,
   initial,
   submitLabel,
 }: {
   action: Action;
+  // Kategorie sekce – zamčená, jen se zobrazí a odešle skrytým polem.
+  category: Category;
   initial?: { name: string; group: Group };
   submitLabel: string;
 }) {
@@ -35,6 +39,15 @@ export function PlayerForm({
 
   return (
     <form action={formAction} className="space-y-4">
+      <input type="hidden" name="category" value={category} />
+      <div>
+        <label className="mb-1 block text-sm font-medium text-neutral-700">
+          Kategorie
+        </label>
+        <div className="rounded-md border border-neutral-200 bg-neutral-50 px-3 py-2 text-sm text-neutral-700">
+          {CATEGORY_LABELS[category]}
+        </div>
+      </div>
       <div>
         <label className="mb-1 block text-sm font-medium text-neutral-700">
           Jméno
@@ -68,7 +81,7 @@ export function PlayerForm({
           {pending ? "Ukládám…" : submitLabel}
         </Button>
         <Button asChild variant="outline">
-          <Link href="/admin/hraci">Zrušit</Link>
+          <Link href={categoryHref("/admin/hraci", category)}>Zrušit</Link>
         </Button>
       </div>
     </form>

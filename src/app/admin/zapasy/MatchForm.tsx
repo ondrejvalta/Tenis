@@ -3,7 +3,15 @@
 import Link from "next/link";
 import { useActionState, useMemo, useState } from "react";
 import { CalendarIcon } from "lucide-react";
-import { GROUPS, type Group, type Player, type SetScore } from "@/data/types";
+import {
+  CATEGORY_LABELS,
+  GROUPS,
+  type Category,
+  type Group,
+  type Player,
+  type SetScore,
+} from "@/data/types";
+import { categoryHref } from "@/lib/category";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -50,11 +58,14 @@ type Action = (
 
 export function MatchForm({
   action,
+  category,
   players,
   initial,
   submitLabel,
 }: {
   action: Action;
+  // Kategorie sekce – zamčená, jen se zobrazí a odešle skrytým polem.
+  category: Category;
   players: Player[];
   initial?: {
     date: string;
@@ -83,12 +94,20 @@ export function MatchForm({
     initial?.date ? parseYmd(initial.date) : new Date(),
   );
   const [dateOpen, setDateOpen] = useState(false);
+
+  // Vyčistí výběr hráčů (např. po změně skupiny).
+  const resetPlayers = () => {
+    setPlayer1Id("");
+    setPlayer2Id("");
+    setForfeitPlayerId("");
+  };
+
   const playersInGroup = useMemo(
     () =>
       players
-        .filter((p) => p.group === group)
+        .filter((p) => p.category === category && p.group === group)
         .sort((a, b) => a.name.localeCompare(b.name, "cs")),
-    [players, group],
+    [players, category, group],
   );
   const playerNameById = useMemo(() => {
     const m = new Map<string, string>();
@@ -104,7 +123,8 @@ export function MatchForm({
 
   return (
     <form action={formAction} className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
+      <input type="hidden" name="category" value={category} />
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div>
           <label className="mb-1 block text-sm font-medium text-neutral-700">
             Datum
@@ -139,12 +159,23 @@ export function MatchForm({
         </div>
         <div>
           <label className="mb-1 block text-sm font-medium text-neutral-700">
+            Kategorie
+          </label>
+          <div className="flex h-9 items-center rounded-md border border-neutral-200 bg-neutral-50 px-3 text-sm text-neutral-700">
+            {CATEGORY_LABELS[category]}
+          </div>
+        </div>
+        <div>
+          <label className="mb-1 block text-sm font-medium text-neutral-700">
             Skupina
           </label>
           <Select
             name="group"
             value={group}
-            onValueChange={(v) => setGroup(v as Group)}
+            onValueChange={(v) => {
+              setGroup(v as Group);
+              resetPlayers();
+            }}
           >
             <SelectTrigger className="w-full">
               <SelectValue />
@@ -368,7 +399,7 @@ export function MatchForm({
           {pending ? "Ukládám…" : submitLabel}
         </Button>
         <Button asChild variant="outline">
-          <Link href="/admin/zapasy">Zrušit</Link>
+          <Link href={categoryHref("/admin/zapasy", category)}>Zrušit</Link>
         </Button>
       </div>
     </form>
