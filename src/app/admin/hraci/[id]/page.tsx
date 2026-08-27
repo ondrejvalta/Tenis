@@ -24,10 +24,10 @@ export default async function EditPlayerPage({
       </h1>
       <PlayerForm
         action={action}
+        category={player.category}
         initial={{
           name: player.name,
           group: player.group,
-          category: player.category,
         }}
         submitLabel="Uložit změny"
       />

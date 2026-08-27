@@ -2,33 +2,43 @@ import Link from "next/link";
 import { fetchMatches, fetchPlayers } from "@/lib/data";
 import { formatDate, formatScore } from "@/lib/format";
 import { CATEGORY_LABELS } from "@/data/types";
+import { categoryHref, parseCategory } from "@/lib/category";
+import { CategorySwitch } from "@/components/CategorySwitch";
 import { deleteMatch } from "./actions";
 import { DeleteButton } from "@/components/DeleteButton";
 
 export const metadata = { title: "Správa zápasů – Administrace" };
 
-type SearchParams = Promise<{ error?: string }>;
+type SearchParams = Promise<{ error?: string; kategorie?: string }>;
 
 export default async function AdminMatchesPage({
   searchParams,
 }: {
   searchParams: SearchParams;
 }) {
-  const { error } = await searchParams;
-  const [matches, players] = await Promise.all([fetchMatches(), fetchPlayers()]);
+  const { error, kategorie } = await searchParams;
+  const category = parseCategory(kategorie);
+  const [matches, players] = await Promise.all([
+    fetchMatches(category),
+    fetchPlayers(category),
+  ]);
   const playersById = new Map(players.map((p) => [p.id, p]));
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold tracking-tight">Zápasy</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">
+          Zápasy – {CATEGORY_LABELS[category]}
+        </h1>
         <Link
-          href="/admin/zapasy/novy"
+          href={categoryHref("/admin/zapasy/novy", category)}
           className="rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800"
         >
           + Přidat zápas
         </Link>
       </div>
+
+      <CategorySwitch basePath="/admin/zapasy" active={category} />
 
       {error && (
         <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
@@ -50,9 +60,6 @@ export default async function AdminMatchesPage({
               <div className="flex items-center gap-3">
                 <span className="w-24 text-neutral-500">
                   {formatDate(m.date)}
-                </span>
-                <span className="rounded bg-lime-100 px-1.5 py-0.5 text-xs font-medium text-lime-800">
-                  {CATEGORY_LABELS[m.category]}
                 </span>
                 <span className="rounded bg-neutral-100 px-1.5 py-0.5 text-xs font-medium text-neutral-700">
                   Sk. {m.group}
@@ -83,6 +90,12 @@ export default async function AdminMatchesPage({
         })}
       </ul>
       </div>
+
+      {matches.length === 0 && (
+        <p className="text-sm text-neutral-500">
+          Zatím žádné zápasy v této kategorii.
+        </p>
+      )}
     </div>
   );
 }

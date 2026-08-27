@@ -4,13 +4,22 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/auth";
+import { categoryHref } from "@/lib/category";
 import type { Database } from "@/lib/supabase/database.types";
-import { CATEGORIES, type Category } from "@/data/types";
+import { CATEGORIES, DEFAULT_CATEGORY, type Category } from "@/data/types";
 
 type Group = Database["public"]["Enums"]["league_group"];
 const VALID_GROUPS: Group[] = ["A", "B", "C", "D"];
 
 export type MatchFormState = { error?: string } | undefined;
+
+// Cesta na seznam zápasů pro danou kategorii, volitelně s chybovou hláškou.
+function matchesListUrl(category: Category, error?: string): string {
+  const base = categoryHref("/admin/zapasy", category);
+  if (!error) return base;
+  const sep = base.includes("?") ? "&" : "?";
+  return `${base}${sep}error=${encodeURIComponent(error)}`;
+}
 
 type ParsedSet = {
   set_number: number;
@@ -175,7 +184,7 @@ export async function createMatch(
   }
 
   revalidateAll();
-  redirect("/admin/zapasy");
+  redirect(matchesListUrl(parsed.category));
 }
 
 export async function updateMatch(
@@ -210,7 +219,7 @@ export async function updateMatch(
   if (setsErr) return { error: setsErr.message };
 
   revalidateAll(id);
-  redirect("/admin/zapasy");
+  redirect(matchesListUrl(parsed.category));
 }
 
 export async function deleteMatch(formData: FormData) {
@@ -219,10 +228,18 @@ export async function deleteMatch(formData: FormData) {
   if (!id) return;
 
   const supabase = await createClient();
+  // Kategorii zápasu zjistíme před smazáním kvůli návratu na správný seznam.
+  const { data: existing } = await supabase
+    .from("matches")
+    .select("category")
+    .eq("id", id)
+    .maybeSingle();
+  const category: Category = existing?.category ?? DEFAULT_CATEGORY;
+
   await supabase.from("match_sets").delete().eq("match_id", id);
   const { error } = await supabase.from("matches").delete().eq("id", id);
-  if (error) redirect(`/admin/zapasy?error=${encodeURIComponent(error.message)}`);
+  if (error) redirect(matchesListUrl(category, error.message));
 
   revalidateAll();
-  redirect("/admin/zapasy");
+  redirect(matchesListUrl(category));
 }

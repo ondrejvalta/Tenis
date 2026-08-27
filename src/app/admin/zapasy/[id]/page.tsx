@@ -11,10 +11,11 @@ export default async function EditMatchPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [matches, players] = await Promise.all([fetchMatches(), fetchPlayers()]);
+  const matches = await fetchMatches();
   const match = matches.find((m) => m.id === id);
   if (!match) notFound();
 
+  const players = await fetchPlayers(match.category);
   const action = updateMatch.bind(null, match.id);
 
   return (
@@ -22,11 +23,11 @@ export default async function EditMatchPage({
       <h1 className="text-2xl font-semibold tracking-tight">Upravit zápas</h1>
       <MatchForm
         action={action}
+        category={match.category}
         players={players}
         initial={{
           date: match.date,
           group: match.group,
-          category: match.category,
           player1Id: match.player1Id,
           player2Id: match.player2Id,
           forfeit: !!match.forfeit,
