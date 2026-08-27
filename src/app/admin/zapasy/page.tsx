@@ -1,9 +1,16 @@
 import Link from "next/link";
 import { fetchMatches, fetchPlayers } from "@/lib/data";
 import { formatDate, formatScore } from "@/lib/format";
-import { CATEGORY_LABELS } from "@/data/types";
+import {
+  CATEGORY_LABELS,
+  GROUPS,
+  type Group,
+  type Match,
+  type Player,
+} from "@/data/types";
 import { categoryHref, parseCategory } from "@/lib/category";
 import { CategorySwitch } from "@/components/CategorySwitch";
+import { CollapsibleSection } from "@/components/CollapsibleSection";
 import { deleteMatch } from "./actions";
 import { DeleteButton } from "@/components/DeleteButton";
 
@@ -46,49 +53,23 @@ export default async function AdminMatchesPage({
         </p>
       )}
 
-      <div className="overflow-x-auto rounded-lg border border-neutral-200">
-      <ul className="min-w-[640px] bg-white">
-        {matches.map((m) => {
-          const p1 = playersById.get(m.player1Id);
-          const p2 = playersById.get(m.player2Id);
-          const p1Won = m.winnerId === m.player1Id;
+      <div className="space-y-3">
+        {GROUPS.map((group, idx) => {
+          const groupMatches = matches
+            .filter((m) => m.group === group)
+            .slice()
+            .sort((a, b) => b.date.localeCompare(a.date));
+          if (groupMatches.length === 0) return null;
           return (
-            <li
-              key={m.id}
-              className="flex items-center justify-between border-b border-neutral-100 px-4 py-2.5 text-sm last:border-b-0"
-            >
-              <div className="flex items-center gap-3">
-                <span className="w-24 text-neutral-500">
-                  {formatDate(m.date)}
-                </span>
-                <span className="rounded bg-neutral-100 px-1.5 py-0.5 text-xs font-medium text-neutral-700">
-                  Sk. {m.group}
-                </span>
-                <span className={p1Won ? "font-semibold" : ""}>{p1?.name}</span>
-                <span className="text-neutral-400">vs.</span>
-                <span className={!p1Won ? "font-semibold" : ""}>{p2?.name}</span>
-                <span className="font-mono text-neutral-600">
-                  {formatScore(m)}
-                </span>
-                {m.forfeit && (
-                  <span className="rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-800">
-                    kont.
-                  </span>
-                )}
-              </div>
-              <div className="flex gap-2">
-                <Link
-                  href={`/admin/zapasy/${m.id}`}
-                  className="rounded-md border border-neutral-300 bg-white px-3 py-1 text-xs hover:bg-neutral-50"
-                >
-                  Upravit
-                </Link>
-                <DeleteButton action={deleteMatch} id={m.id} confirm="Opravdu chceš smazat tento zápas?" />
-              </div>
-            </li>
+            <MatchesTable
+              key={group}
+              group={group}
+              matches={groupMatches}
+              playersById={playersById}
+              defaultOpen={idx === 0}
+            />
           );
         })}
-      </ul>
       </div>
 
       {matches.length === 0 && (
@@ -98,4 +79,88 @@ export default async function AdminMatchesPage({
       )}
     </div>
   );
+}
+
+function MatchesTable({
+  group,
+  matches,
+  playersById,
+  defaultOpen,
+}: {
+  group: Group;
+  matches: Match[];
+  playersById: Map<string, Player>;
+  defaultOpen?: boolean;
+}) {
+  return (
+    <CollapsibleSection
+      id={`admin-zapasy-skupina-${group}`}
+      defaultOpen={defaultOpen}
+      title={`Skupina ${group}`}
+      meta={`${matches.length} ${matchCountLabel(matches.length)}`}
+    >
+      <div className="overflow-x-auto border-t border-neutral-100">
+        <table className="w-full min-w-[640px] text-sm">
+          <thead className="bg-neutral-50 text-left text-neutral-500">
+            <tr>
+              <th className="px-4 py-3 font-medium">Datum</th>
+              <th className="px-4 py-3 font-medium">Zápas</th>
+              <th className="px-4 py-3 font-medium">Skóre</th>
+              <th className="px-4 py-3 font-medium text-right">Akce</th>
+            </tr>
+          </thead>
+          <tbody>
+            {matches.map((m) => {
+              const p1 = playersById.get(m.player1Id);
+              const p2 = playersById.get(m.player2Id);
+              const p1Won = m.winnerId === m.player1Id;
+              return (
+                <tr key={m.id} className="border-t border-neutral-100">
+                  <td className="whitespace-nowrap px-4 py-3 text-neutral-500">
+                    {formatDate(m.date)}
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                      <span className={p1Won ? "font-semibold" : ""}>
+                        {p1?.name}
+                      </span>
+                      <span className="text-neutral-400">vs.</span>
+                      <span className={!p1Won ? "font-semibold" : ""}>
+                        {p2?.name}
+                      </span>
+                      {m.forfeit && (
+                        <span className="rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-800">
+                          kont.
+                        </span>
+                      )}
+                    </span>
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-3 font-mono text-neutral-600">
+                    {formatScore(m)}
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex justify-end gap-2">
+                      <Link
+                        href={`/admin/zapasy/${m.id}`}
+                        className="rounded-md border border-neutral-300 bg-white px-3 py-1 text-xs hover:bg-neutral-50"
+                      >
+                        Upravit
+                      </Link>
+                      <DeleteButton action={deleteMatch} id={m.id} confirm="Opravdu chceš smazat tento zápas?" />
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </CollapsibleSection>
+  );
+}
+
+function matchCountLabel(n: number): string {
+  if (n === 1) return "zápas";
+  if (n >= 2 && n <= 4) return "zápasy";
+  return "zápasů";
 }
