@@ -40,6 +40,12 @@ export default async function Home() {
           >
             Výsledky zápasů
           </Link>
+          <Link
+            href="/zebricek#zebricek-dospeli-pavouk"
+            className="rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-medium hover:bg-neutral-50"
+          >
+            Pavouk skupiny A-B
+          </Link>
         </div>
       </section>
 

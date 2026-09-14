@@ -37,12 +37,22 @@ export default async function AdminMatchesPage({
         <h1 className="text-2xl font-semibold tracking-tight">
           Zápasy – {CATEGORY_LABELS[category]}
         </h1>
-        <Link
-          href={categoryHref("/admin/zapasy/novy", category)}
-          className="rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800"
-        >
-          + Přidat zápas
-        </Link>
+        <div className="flex gap-2">
+          {category === "dospeli" && (
+            <Link
+              href="/admin/zapasy/pavouk"
+              className="rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-900 hover:bg-neutral-50"
+            >
+              Zápasy pavouk
+            </Link>
+          )}
+          <Link
+            href={categoryHref("/admin/zapasy/novy", category)}
+            className="rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800"
+          >
+            + Přidat zápas
+          </Link>
+        </div>
       </div>
 
       <CategorySwitch basePath="/admin/zapasy" active={category} />

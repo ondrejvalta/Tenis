@@ -7,6 +7,7 @@ import { requireAdmin } from "@/lib/auth";
 import { categoryHref } from "@/lib/category";
 import type { Database } from "@/lib/supabase/database.types";
 import { CATEGORIES, DEFAULT_CATEGORY, type Category } from "@/data/types";
+import { parseSets, type ParsedSet } from "./sets";
 
 type Group = Database["public"]["Enums"]["league_group"];
 const VALID_GROUPS: Group[] = ["A", "B", "C", "D"];
@@ -21,15 +22,6 @@ function matchesListUrl(category: Category, error?: string): string {
   return `${base}${sep}error=${encodeURIComponent(error)}`;
 }
 
-type ParsedSet = {
-  set_number: number;
-  p1_games: number;
-  p2_games: number;
-  tiebreak_p1: number | null;
-  tiebreak_p2: number | null;
-  super_tiebreak: boolean;
-};
-
 type Parsed = {
   date: string;
   group: Group;
@@ -40,18 +32,6 @@ type Parsed = {
   sets: ParsedSet[];
   winner_id: string;
 };
-
-function parseInt0(v: FormDataEntryValue | null): number {
-  const n = Number(String(v ?? "").trim());
-  return Number.isFinite(n) && n >= 0 ? Math.floor(n) : 0;
-}
-
-function parseIntNullable(v: FormDataEntryValue | null): number | null {
-  const s = String(v ?? "").trim();
-  if (s === "") return null;
-  const n = Number(s);
-  return Number.isFinite(n) && n >= 0 ? Math.floor(n) : null;
-}
 
 async function parseForm(
   formData: FormData,
@@ -88,36 +68,9 @@ async function parseForm(
   if (pls.some((p) => p.group !== group))
     return { error: "Oba hráči musí být ve vybrané skupině." };
 
-  const sets: ParsedSet[] = [];
-  let p1SetsWon = 0;
-  let p2SetsWon = 0;
-
-  for (let i = 1; i <= 3; i++) {
-    const p1 = parseInt0(formData.get(`set${i}_p1`));
-    const p2 = parseInt0(formData.get(`set${i}_p2`));
-    const isSuper = i === 3;
-    const tbp1 = isSuper ? null : parseIntNullable(formData.get(`set${i}_tb_p1`));
-    const tbp2 = isSuper ? null : parseIntNullable(formData.get(`set${i}_tb_p2`));
-
-    const filled = p1 > 0 || p2 > 0;
-    if (!filled) {
-      if (i <= 2 && !forfeit) return { error: `Sety 1 a 2 jsou povinné.` };
-      continue;
-    }
-    if (p1 === p2)
-      return { error: `Set ${i}: skóre nemůže být rovné (${p1}:${p2}).` };
-
-    sets.push({
-      set_number: i,
-      p1_games: p1,
-      p2_games: p2,
-      tiebreak_p1: tbp1,
-      tiebreak_p2: tbp2,
-      super_tiebreak: isSuper,
-    });
-    if (p1 > p2) p1SetsWon++;
-    else p2SetsWon++;
-  }
+  const parsedSets = parseSets(formData, { requireFirstTwo: !forfeit });
+  if ("error" in parsedSets) return parsedSets;
+  const { sets, p1SetsWon, p2SetsWon } = parsedSets;
 
   if (!forfeit && sets.length < 2)
     return { error: "Zápas musí mít aspoň 2 sety." };

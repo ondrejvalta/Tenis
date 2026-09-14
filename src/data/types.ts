@@ -44,6 +44,50 @@ export type Match = {
   forfeit?: boolean;
 };
 
+// --- Pavouk (vyřazovací strom) ---
+
+// Kola pavouka od osmifinále po finále (16 hráčů / 4 kola).
+export type BracketRound =
+  | "osmifinale"
+  | "ctvrtfinale"
+  | "semifinale"
+  | "finale";
+
+export const BRACKET_ROUNDS: BracketRound[] = [
+  "osmifinale",
+  "ctvrtfinale",
+  "semifinale",
+  "finale",
+];
+
+export const BRACKET_ROUND_LABELS: Record<BracketRound, string> = {
+  osmifinale: "Osmifinále",
+  ctvrtfinale: "Čtvrtfinále",
+  semifinale: "Semifinále",
+  finale: "Finále",
+};
+
+// Počet okýnek (zápasů) v jednotlivých kolech.
+export const BRACKET_ROUND_SIZE: Record<BracketRound, number> = {
+  osmifinale: 8,
+  ctvrtfinale: 4,
+  semifinale: 2,
+  finale: 1,
+};
+
+export type BracketMatch = {
+  id: string;
+  category: Category;
+  round: BracketRound;
+  // Okýnko 1..N shora dolů v rámci kola.
+  position: number;
+  player1Id: string | null;
+  player2Id: string | null;
+  winnerId: string | null;
+  date: string | null;
+  sets: SetScore[];
+};
+
 export type StandingRow = {
   playerId: string;
   played: number;
