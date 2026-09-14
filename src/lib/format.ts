@@ -1,4 +1,4 @@
-import type { Match } from "@/data/types";
+import type { SetScore } from "@/data/types";
 
 export function formatDate(iso: string): string {
   const d = new Date(iso);
@@ -9,7 +9,10 @@ export function formatDate(iso: string): string {
   });
 }
 
-export function formatScore(match: Match, fromPlayer1Perspective = true): string {
+export function formatScore(
+  match: { sets: SetScore[] },
+  fromPlayer1Perspective = true,
+): string {
   return match.sets
     .map((s) => {
       const a = fromPlayer1Perspective ? s.p1 : s.p2;

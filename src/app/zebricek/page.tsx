@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { fetchMatches, fetchPlayers } from "@/lib/data";
+import { fetchBracketMatches, fetchMatches, fetchPlayers } from "@/lib/data";
 import { CollapsibleSection } from "@/components/CollapsibleSection";
 import { CategorySwitch } from "@/components/CategorySwitch";
+import { Bracket } from "@/components/Bracket";
 import { parseCategory } from "@/lib/category";
 import { computeStandingsForGroup } from "@/data/standings";
 import {
@@ -22,9 +23,10 @@ export default async function ZebricekPage({
   searchParams: Promise<{ kategorie?: string }>;
 }) {
   const category = parseCategory((await searchParams).kategorie);
-  const [players, matches] = await Promise.all([
+  const [players, matches, bracketMatches] = await Promise.all([
     fetchPlayers(category),
     fetchMatches(category),
+    category === "dospeli" ? fetchBracketMatches("dospeli") : Promise.resolve([]),
   ]);
   const playersById = new Map(players.map((p) => [p.id, p]));
 
@@ -53,6 +55,17 @@ export default async function ZebricekPage({
             defaultOpen={idx === 0}
           />
         ))}
+
+        {category === "dospeli" && (
+          <CollapsibleSection
+            id="zebricek-dospeli-pavouk"
+            title="Pavouk skupiny A-B"
+          >
+            <div className="border-t border-neutral-100">
+              <Bracket matches={bracketMatches} playersById={playersById} />
+            </div>
+          </CollapsibleSection>
+        )}
       </div>
     </div>
   );

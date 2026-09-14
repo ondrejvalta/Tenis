@@ -29,6 +29,99 @@ export type Database = {
         }
         Relationships: []
       }
+      bracket_match_sets: {
+        Row: {
+          bracket_match_id: string
+          p1_games: number
+          p2_games: number
+          set_number: number
+          super_tiebreak: boolean
+          tiebreak_p1: number | null
+          tiebreak_p2: number | null
+        }
+        Insert: {
+          bracket_match_id: string
+          p1_games: number
+          p2_games: number
+          set_number: number
+          super_tiebreak?: boolean
+          tiebreak_p1?: number | null
+          tiebreak_p2?: number | null
+        }
+        Update: {
+          bracket_match_id?: string
+          p1_games?: number
+          p2_games?: number
+          set_number?: number
+          super_tiebreak?: boolean
+          tiebreak_p1?: number | null
+          tiebreak_p2?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bracket_match_sets_bracket_match_id_fkey"
+            columns: ["bracket_match_id"]
+            isOneToOne: false
+            referencedRelation: "bracket_matches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bracket_matches: {
+        Row: {
+          category: Database["public"]["Enums"]["player_category"]
+          date: string | null
+          id: string
+          player1_id: string | null
+          player2_id: string | null
+          position: number
+          round: Database["public"]["Enums"]["bracket_round"]
+          winner_id: string | null
+        }
+        Insert: {
+          category?: Database["public"]["Enums"]["player_category"]
+          date?: string | null
+          id: string
+          player1_id?: string | null
+          player2_id?: string | null
+          position: number
+          round: Database["public"]["Enums"]["bracket_round"]
+          winner_id?: string | null
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["player_category"]
+          date?: string | null
+          id?: string
+          player1_id?: string | null
+          player2_id?: string | null
+          position?: number
+          round?: Database["public"]["Enums"]["bracket_round"]
+          winner_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bracket_matches_player1_id_fkey"
+            columns: ["player1_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bracket_matches_player2_id_fkey"
+            columns: ["player2_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bracket_matches_winner_id_fkey"
+            columns: ["winner_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       match_sets: {
         Row: {
           match_id: string
@@ -154,6 +247,7 @@ export type Database = {
       is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
+      bracket_round: "osmifinale" | "ctvrtfinale" | "semifinale" | "finale"
       league_group: "A" | "B" | "C" | "D"
       player_category: "dospeli" | "deti"
     }
@@ -283,6 +377,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      bracket_round: ["osmifinale", "ctvrtfinale", "semifinale", "finale"],
       league_group: ["A", "B", "C", "D"],
       player_category: ["dospeli", "deti"],
     },
